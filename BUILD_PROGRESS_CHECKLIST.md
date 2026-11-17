@@ -47,7 +47,14 @@ Source of truth: `CLAUDE.md` + `aerostep_master_build_publish_runbook.md`.
 - [x] `flutter build apk --debug` — OK (compileSdk 37, AGP 9, Kotlin non-incremental for cross-drive Windows builds)
 
 ## Phase 6: GitHub push + Pages privacy policy / app-ads.txt
-- [ ] 
+- [x] Public repo: https://github.com/sunilkumar101/aerostep_ai (lib/, android/, ios/, assets/, docs/)
+- [x] GitHub Pages from `main:/docs` — `curl -I` HTTP 200:
+  - Privacy Policy: https://sunilkumar101.github.io/aerostep_ai/privacy-policy.html
+  - Terms: https://sunilkumar101.github.io/aerostep_ai/terms.html
+  - app-ads.txt: https://sunilkumar101.github.io/aerostep_ai/app-ads.txt
+- [ ] Replace `SUPPORT_EMAIL_PLACEHOLDER` in privacy policy / terms — needs user
+- [ ] AdMob requires app-ads.txt at the domain ROOT (`https://sunilkumar101.github.io/app-ads.txt`) → needs a `sunilkumar101.github.io` user-site repo + real publisher ID — needs user
+- **[VERIFIED PASS — URLs live] 2026-11-17**
 
 ## Phase 7: USB device QA + signed .aab
 - [ ] 
