@@ -78,7 +78,13 @@ Bugs found on device and fixed:
 - **[VERIFIED PASS — 7/8 on device; Health Connect pending install] 2026-11-17**
 
 ## Phase 8: ASO metadata
-- [ ] 
+- [x] Ahrefs keyword research (US + global): head terms pedometer 19k, step counter 9.5k, step tracker 4.6k, walking app 2.6k; low-KD long tail listed in `store_assets/aso_keyword_research.md`
+- [x] Title `AeroStep: Pedometer & Step AI` (29/30)
+- [x] Short description (77/80)
+- [x] Full description (3,007/4,000), only shipped features, Play policy guardrails (no "best"/competitor names/unverifiable claims)
+- [x] Saved `store_assets/aso_metadata.json` (+ release notes, contact email, privacy URL)
+- Note: Squads leaderboard/chat, Virtual Trail progress, Meal Snap and Pro are UI demos without a backend and are deliberately NOT advertised.
+- **[VERIFIED PASS] 2026-11-17**
 
 ## Phase 9: Store visual assets + promo video
 - [ ] 
