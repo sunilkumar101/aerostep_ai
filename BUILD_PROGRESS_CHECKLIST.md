@@ -110,7 +110,9 @@ Developer account: "Chanchal Raj" (personal), signed in as skkhatri2024@gmail.co
 - [x] Internal testing release 1 (1.0.0) published to tester list 'AeroStep owner' (owner email only)
 - [x] Closed testing - Alpha: all countries, testers 'AeroStep owner', draft release with v1 + notes
 - [x] Foreground service declaration blocker resolved by removing the service: v1.0.1 (versionCode 2) drops FOREGROUND_SERVICE, FOREGROUND_SERVICE_HEALTH, POST_NOTIFICATIONS, RECEIVE_BOOT_COMPLETED and flutter_foreground_task. Privacy policy section 3 and the full description updated (no notification claim). 40/40 tests pass.
-- [ ] Upload v1.0.1 (2) .aab to Internal testing + Closed testing Alpha (replacing v1), then send for review
+- [x] v1.0.1 (2) uploaded (by user); Internal testing release 2 (1.0.1) published to 'AeroStep owner'; Closed testing Alpha release 2 (1.0.1) saved with 0 errors. Foreground service declaration now lists no permissions.
+- [x] Store listing full description updated in Console (3022 chars, no notification claim); AI asset declaration "Don't label assets" saved by user (all graphics are rendered app UI)
+- [x] 2026-11-17: 15 changes sent to Google for review (user approved "Send for review now"). Status: Changes in review.
 - [ ] Testers list + closed test (personal accounts: 12+ testers for 14 days before production access)
 - [ ] Real AdMob app/ad-unit ids before production (AdMob signup pending); trader status (account owner)
-- [ ] "Send for review" in Publishing overview: only with explicit user go-ahead
+- [x] "Send for review" in Publishing overview, with explicit user go-ahead
