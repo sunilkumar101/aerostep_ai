@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_small_description">Today\'s steps and goal ring</string>
+    <string name="widget_bento_description">Steps, calories, cadence and a 1-tap +250 ml water log</string>
+</resources>

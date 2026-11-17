@@ -1,0 +1,62 @@
+# AeroStep AI — Build Progress Checklist
+
+Source of truth: `CLAUDE.md` + `aerostep_master_build_publish_runbook.md`.
+
+## Phase 1: Smart Open-Source Bootstrap & Stitch Asset Ingestion
+- [x] Stitch assets located (already extracted under `ui_ux_stitch_assets/stitch_aerostep_ai_fitness_app/stitch_aerostep_ai_fitness_app/`; no zip present)
+- [x] DESIGN.md + design tokens read; 15 screen folders + 2 runner photos inspected
+- [x] Flutter project initialised (Android + iOS), applicationId / bundle id `com.sunilkhatri.aerostep`
+- [x] Runner photos copied to `assets/images/hero_runner_light.png` / `hero_runner_dark.png`
+- [x] Packages added: riverpod, go_router, shared_preferences, drift (+drift_flutter), pedometer, sensors_plus, flutter_activity_recognition, health, permission_handler, flutter_foreground_task, disable_battery_optimization, device_info_plus, google_fonts, fl_chart, home_widget, google_mobile_ads, share_plus, url_launcher
+- [x] `flutter pub get` + `flutter analyze` clean
+- Note: `sqlite3_flutter_libs` is end-of-life upstream; replaced with `drift_flutter` (bundles sqlite via build hooks).
+- **[VERIFIED PASS] 2026-11-17T09:51Z**
+
+## Phase 2: Warm Bento Dynamic UI/UX (13 screens + light/espresso themes)
+- [x] Design system (`lib/design_system/`): tokens, light + espresso themes, Bento/Tangerine/Charcoal/Cyan cards, segmented pills, ring, dock
+- [x] Contrast fix: `CharcoalCard` forces white text; `AeroSegmented` active pill = #141416 + #FFFFFF (Trends "Week" + "Century Streak")
+- [x] Unified `AeroFloatingBottomDock` (Home / Analysis / Trails / Squads + AI Sparkle FAB with pulsing cyan dot)
+- [x] All Stitch screens implemented and wired (onboarding L/D, smart setup, home, tracker L/D, analysis, trends, live walk, trails, squads, AI coach hub + stride coach, widgets/watch, unlock pass)
+- [x] Zero RenderFlex overflow at 360x640 — `test/app_smoke_test.dart` (13 cases, light + dark, every tab/sub-view/route, scrolled)
+- **[VERIFIED PASS] 2026-11-17T11:10Z**
+
+## Phase 3: Pedometer engine, anti-shake, OEM battery, UTC ledger
+- [x] Hardware step counter engine (`lib/core/pedometer/step_engine.dart`); accelerometer (~120 Hz) only while validating a new bout
+- [x] Anti-shake / vehicle gate: 60–220 SPM sustained > 6 s + activity recognition IN_VEHICLE/ON_BICYCLE + accel shake veto
+- [x] Health Connect / HealthKit 15-min UTC bucket dedup (max per bucket), synced every 15 min
+- [x] UTC ledger (drift) with per-row offset; travel-proof local days; Streak Shield auto-deploy
+- [x] Android foreground service (type `health`) + persistent notification; 1-tap OEM battery wizard (native MethodChannel in MainActivity.kt)
+- [x] Unit tests: `test/pedometer_core_test.dart` — 20/20 pass
+- Note: `disable_battery_optimization` removed (abandoned, breaks AGP 9) — replaced by native intents.
+- **[VERIFIED PASS] 2026-11-17T11:10Z** (on-device behaviour pending Phase 7)
+
+## Phase 4: Ethical AdMob
+- [x] `google_mobile_ads` configured (Android manifest placeholder, iOS GADApplicationIdentifier via xcconfig)
+- [x] Rewarded video only on "Watch Video to Unlock (30s)" / trail "Unlock" → grants 1x Streak Shield or 24h Trail Pass only when reward earned
+- [x] Zero interstitial / app-open ads; offline / no-fill fallback message
+- [ ] Real AdMob app id + rewarded unit ids (currently Google TEST ids) — needs user
+- **[VERIFIED PASS — test ids] 2026-11-17T11:10Z**
+
+## Phase 5: iOS readiness + WidgetKit
+- [x] Podfile `platform :ios, '15.0'`; Info.plist motion/health/background/GAD/ATT keys; Runner.entitlements (HealthKit + App Group); deployment target 15.0
+- [x] Swift WidgetKit sources: 2x2 Small Tangerine + 4x2 Bento (interactive +250 ml App Intent on iOS 17)
+- [ ] Add widget extension target in Xcode + `flutter build ios --config-only --no-codesign` — **requires macOS** (see `ios/AeroStepWidget/README_XCODE_SETUP.md`)
+
+## Build
+- [x] `flutter analyze` — no issues
+- [x] `flutter build apk --debug` — OK (compileSdk 37, AGP 9, Kotlin non-incremental for cross-drive Windows builds)
+
+## Phase 6: GitHub push + Pages privacy policy / app-ads.txt
+- [ ] 
+
+## Phase 7: USB device QA + signed .aab
+- [ ] 
+
+## Phase 8: ASO metadata
+- [ ] 
+
+## Phase 9: Store visual assets + promo video
+- [ ] 
+
+## Phase 10: Play Console submission
+- [ ] 

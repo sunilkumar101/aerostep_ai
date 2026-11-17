@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_stack" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {"darkMode":"class","theme":{"extend":{"colors":{"surface-dim":"#dcd9dc","on-surface":"#1b1b1d","inverse-surface":"#303032","on-surface-variant":"#584238","primary-container":"#ff7a2f","tertiary":"#934b13","on-primary-fixed":"#351000","inverse-primary":"#ffb693","surface-container":"#f0edef","primary-fixed-dim":"#ffb693","secondary":"#006782","tertiary-fixed":"#ffdbc8","surface-container-highest":"#e5e1e4","on-tertiary-fixed-variant":"#743500","outline":"#8c7166","inverse-on-surface":"#f3f0f2","on-secondary-fixed":"#001f29","on-secondary-container":"#00566d","outline-variant":"#dfc0b2","on-error-container":"#93000a","on-tertiary-container":"#5c2900","surface":"#fcf8fb","on-secondary":"#ffffff","tertiary-container":"#e48b4f","on-primary-container":"#612400","primary":"#a04100","on-background":"#1b1b1d","background":"#fcf8fb","secondary-fixed-dim":"#5fd4ff","surface-container-low":"#f6f3f5","on-tertiary-fixed":"#311300","on-primary":"#ffffff","secondary-fixed":"#bbe9ff","on-error":"#ffffff","tertiary-fixed-dim":"#ffb689","error-container":"#ffdad6","surface-container-lowest":"#ffffff","surface-container-high":"#eae7ea","secondary-container":"#46cffe","error":"#ba1a1a","surface-variant":"#e5e1e4","primary-fixed":"#ffdbcc","surface-bright":"#fcf8fb","on-secondary-fixed-variant":"#004d63","on-tertiary":"#ffffff","on-primary-fixed-variant":"#7a3000","surface-tint":"#a04100"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"gutter-md":"1rem","space-lg":"1.25rem","space-md":"0.875rem","space-2xl":"2.5rem","space-xs":"0.25rem","gutter":"0.75rem","margin":"1rem","margin-md":"1.5rem","space-sm":"0.5rem","space-xl":"1.75rem"},"fontFamily":{"title-md":["Plus Jakarta Sans"],"data-metric-sm":["Space Grotesk"],"headline-lg-mobile":["Plus Jakarta Sans"],"label-caps":["Space Grotesk"],"data-metric-lg":["Space Grotesk"],"headline-lg":["Plus Jakarta Sans"],"display-hero-mobile":["Space Grotesk"],"body-md":["Plus Jakarta Sans"],"body-lg":["Plus Jakarta Sans"],"display-hero":["Space Grotesk"],"headline-md":["Plus Jakarta Sans"],"caption":["Plus Jakarta Sans"]},"fontSize":{"title-md":["18px",{"lineHeight":"24px","fontWeight":"700"}],"data-metric-sm":["18px",{"lineHeight":"22px","letterSpacing":"-0.02em","fontWeight":"600"}],"headline-lg-mobile":["26px",{"lineHeight":"32px","letterSpacing":"-0.02em","fontWeight":"800"}],"label-caps":["11px",{"lineHeight":"14px","letterSpacing":"0.06em","fontWeight":"700"}],"data-metric-lg":["32px",{"lineHeight":"36px","letterSpacing":"-0.03em","fontWeight":"700"}],"headline-lg":["32px",{"lineHeight":"38px","letterSpacing":"-0.02em","fontWeight":"800"}],"display-hero-mobile":["44px",{"lineHeight":"48px","letterSpacing":"-0.03em","fontWeight":"700"}],"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}],"body-lg":["16px",{"lineHeight":"24px","fontWeight":"500"}],"display-hero":["56px",{"lineHeight":"60px","letterSpacing":"-0.04em","fontWeight":"700"}],"headline-md":["22px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"700"}],"caption":["12px",{"lineHeight":"16px","fontWeight":"500"}]}}}};</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-on-surface antialiased flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-margin flex items-center justify-between"><div class="flex items-center gap-space-xs min-w-0 pr-space-sm"><button aria-label="Close or Go Back" class="w-11 h-11 -ml-space-xs flex items-center justify-center text-on-surface hover:text-primary transition-colors flex-shrink-0" onclick="history.back()"><span class="material-symbols-outlined text-[24px]">close</span></button><div class="flex flex-col justify-center min-w-0"><h1 class="font-title-md text-title-md text-on-surface truncate">Ai Coach Hub</h1><span class="font-caption text-caption text-on-surface-variant truncate">AI Stride Coach &amp; Weight-Loss Hub</span></div></div><div class="flex items-center gap-space-sm flex-shrink-0"><button aria-label="Hub Options" class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface transition-colors"><span class="material-symbols-outlined text-[22px]">more_vert</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex-1 flex flex-col relative w-full px-margin pt-16 pb-safe bg-surface"><div class="flex flex-col w-full pb-24">
+<!-- Mode & Session Indicator Row -->
+<div class="flex items-center justify-between py-space-sm mb-space-sm">
+<div class="flex items-center gap-space-xs px-3 py-1.5 rounded-full bg-surface-container-high shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary animate-ping"></span>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Stride AI Live • Active Sync</span>
+</div>
+<div class="flex items-center gap-1.5 bg-surface-container-lowest shadow-sm rounded-full p-1">
+<button class="px-3 py-1 rounded-full font-caption text-caption font-semibold bg-primary text-on-primary shadow-sm transition-all flex items-center gap-1" id="mode-voice-btn">
+<span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' 1;">mic</span>
+        Voice
+      </button>
+<button class="px-3 py-1 rounded-full font-caption text-caption font-semibold text-on-surface-variant hover:text-on-surface transition-all flex items-center gap-1" id="mode-chat-btn">
+<span class="material-symbols-outlined text-[15px]">chat_bubble</span>
+        Chat
+      </button>
+</div>
+</div>
+<!-- Hero AI Coach Card -->
+<div class="relative overflow-hidden rounded-[28px] p-space-lg bg-gradient-to-br from-[#FF7A2F] via-primary-container to-[#FFA163] text-on-primary shadow-[0_16px_36px_rgba(255,122,47,0.28)] mb-space-md">
+<!-- Starburst Watermark Vector -->
+<svg class="absolute -right-8 -top-8 w-44 h-44 text-white/10 pointer-events-none transform rotate-12" fill="currentColor" viewbox="0 0 100 100">
+<polygon points="50,0 61,35 98,35 68,57 79,91 50,70 21,91 32,57 2,35 39,35"></polygon>
+</svg>
+<div class="relative z-10 flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-9 h-9 rounded-full bg-white text-primary flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.12)]">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+<div>
+<div class="font-label-caps text-label-caps uppercase tracking-wider text-white/90">Real-Time Insight</div>
+<div class="font-body-md text-body-md font-bold text-white leading-none">Stride Intelligence</div>
+</div>
+</div>
+<div class="flex items-center gap-1 bg-white/20 backdrop-blur-md px-2.5 py-1 rounded-full text-white font-caption text-caption">
+<span class="material-symbols-outlined text-[14px]">headphones</span>
+<span>Voice Coach 14:00 min</span>
+</div>
+</div>
+<p class="font-headline-md text-headline-md font-bold leading-snug text-white tracking-tight drop-shadow-sm">
+        "You are <span class="underline decoration-white/40 decoration-2 underline-offset-4">1,580 steps</span> away from your 10k goal! A 14-minute evening stroll locks in a 95 kcal deficit."
+      </p>
+<div class="flex items-center gap-2 pt-1">
+<button class="flex-1 py-3 px-space-md rounded-full bg-surface-container-lowest text-primary font-title-md text-title-md font-bold shadow-lg hover:bg-white active:scale-[0.98] transition-all flex items-center justify-center gap-2" id="start-stride-cta">
+<span>Start Evening Stride</span>
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+<button aria-label="Listen audio prompt" class="w-12 h-12 rounded-full bg-white/20 hover:bg-white/30 text-white backdrop-blur-md flex items-center justify-center transition-colors flex-shrink-0">
+<span class="material-symbols-outlined text-[22px]">volume_up</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Bento Grid Container -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md mb-space-md">
+<!-- Left Tall Bento Card: Hydration Tracker -->
+<div class="bg-surface-container-lowest rounded-[28px] p-space-lg shadow-[0_8px_24px_rgba(0,103,130,0.06)] flex flex-col justify-between relative overflow-hidden">
+<div>
+<div class="flex items-center justify-between mb-space-sm">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">water_drop</span>
+</div>
+<span class="font-title-md text-title-md text-on-surface">Hydration</span>
+</div>
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-bold tracking-wide">
+            70% GOAL
+          </span>
+</div>
+<div class="flex items-baseline gap-1.5 mt-2">
+<span class="font-data-metric-lg text-data-metric-lg text-on-surface font-bold" id="hydration-val">1.75</span>
+<span class="font-title-md text-title-md text-on-surface-variant font-medium">/ 2.5 L</span>
+</div>
+<p class="font-caption text-caption text-secondary mt-1 font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">bolt</span>
+          Hydration speeds fat oxidation by +18%
+        </p>
+</div>
+<!-- Liquid Cylinder Graphic -->
+<div class="my-space-md relative w-full h-36 bg-surface-container-low rounded-2xl p-2.5 flex items-end overflow-hidden shadow-inner">
+<!-- SVG Fluid Level -->
+<div class="w-full bg-gradient-to-t from-secondary via-secondary-fixed-dim to-secondary-container rounded-xl transition-all duration-500 ease-out relative" id="liquid-bar" style="height: 70%;">
+<div class="absolute -top-2 left-0 right-0 h-4 bg-secondary-container/80 rounded-full blur-[1px]"></div>
+<div class="absolute inset-0 opacity-20 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:12px_12px]"></div>
+</div>
+<div class="absolute inset-0 flex flex-col justify-between p-3 pointer-events-none text-on-surface-variant/40 font-data-metric-sm text-[11px]">
+<span class="text-right">2.5L Max</span>
+<span class="text-right">1.25L Mid</span>
+<span class="text-right">0.0L</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="flex-1 py-2.5 px-space-md rounded-full bg-secondary text-on-secondary font-title-md text-caption font-bold shadow-md hover:bg-secondary/90 active:scale-95 transition-all flex items-center justify-center gap-1.5" id="add-water-btn">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span>Tap +250ml</span>
+</button>
+<span class="text-caption text-secondary font-bold opacity-0 transition-opacity duration-300" id="water-toast">Added!</span>
+</div>
+</div>
+<!-- Right Stacked Bento Column -->
+<div class="flex flex-col gap-space-md">
+<!-- Right Top: AI Meal Snap -->
+<div class="bg-gradient-to-br from-[#FFF3EC] to-[#FFE3D1] rounded-[28px] p-space-lg shadow-sm flex flex-col justify-between relative overflow-hidden">
+<div>
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[18px]">photo_camera</span>
+</div>
+<span class="font-title-md text-title-md text-on-surface">AI Meal Snap</span>
+</div>
+<span class="font-caption text-caption font-bold text-primary bg-primary-fixed px-2.5 py-0.5 rounded-full">
+              Balanced Lunch ✓
+            </span>
+</div>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-data-metric-lg text-data-metric-lg text-primary font-bold">1,420</span>
+<span class="font-body-md text-body-md text-on-surface-variant font-medium">/ 2,100 kcal target</span>
+</div>
+<!-- Macro Pills -->
+<div class="flex items-center gap-1.5 mt-2 flex-wrap">
+<span class="font-label-caps text-label-caps bg-surface-container-lowest/80 text-on-surface px-2 py-0.5 rounded-full">P: 84g</span>
+<span class="font-label-caps text-label-caps bg-surface-container-lowest/80 text-on-surface px-2 py-0.5 rounded-full">C: 160g</span>
+<span class="font-label-caps text-label-caps bg-surface-container-lowest/80 text-on-surface px-2 py-0.5 rounded-full">F: 42g</span>
+</div>
+</div>
+<div class="flex items-center gap-3 mt-4">
+<div class="w-12 h-12 rounded-xl overflow-hidden shadow-sm flex-shrink-0 relative">
+<img class="w-full h-full object-cover" data-alt="A brightly lit appetizing healthy lunch bowl filled with grilled chicken slices, quinoa, fresh avocado, edamame beans, and roasted cherry tomatoes on a sleek modern ceramic surface with warm studio illumination." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCuvww_wsP6RK0HzKwB5K-YrpNECZjIGFdJnHerTMlVBfxYKhz-a_IhVUwFGd6PgqZ8HxKtZ3A00uFCGrj07M1B9nZq4sE5t8UJH9IK_nG1yKnSzse1KVWzH_8I6Sg3Zgs9rOs4cqVKSMNSzy6e2KqX4yFgiMX70h5zDBCyMI_FaOo50mbzdY7LKKeLEiL81RhRKli-gqzotizKSfak1bos7wc5LpPTbMqJLdZbueM"/>
+</div>
+<button class="flex-1 py-2.5 px-space-md rounded-full bg-primary text-on-primary font-caption text-caption font-bold shadow-md hover:bg-primary/95 transition-all flex items-center justify-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">add_a_photo</span>
+<span>+ Snap Dinner</span>
+</button>
+</div>
+</div>
+<!-- Right Bottom: Streak Freeze Shield -->
+<div class="bg-inverse-surface rounded-[28px] p-space-lg text-inverse-on-surface shadow-md flex flex-col justify-between relative overflow-hidden">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-tertiary-container/30 text-tertiary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">shield</span>
+</div>
+<div>
+<span class="font-title-md text-title-md text-white">Streak Shield</span>
+<p class="font-caption text-caption text-inverse-on-surface/70">Automatic Rest Day Guard</p>
+</div>
+</div>
+<span class="font-label-caps text-label-caps text-secondary-fixed bg-secondary-fixed/10 px-2 py-1 rounded-full uppercase tracking-wider">Level 4</span>
+</div>
+<div class="my-3">
+<div class="font-data-metric-sm text-data-metric-sm text-white font-bold">2 Rest Days Available</div>
+<p class="font-caption text-caption text-inverse-on-surface/75 mt-0.5">Auto-deploys if cadence drops under 5k steps during rest or illness.</p>
+</div>
+<div class="flex items-center justify-between pt-1">
+<span class="font-caption text-caption text-white font-semibold flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed-dim"></span>
+            Shield Active
+          </span>
+<div class="w-10 h-6 bg-secondary rounded-full p-0.5 flex items-center justify-end cursor-pointer">
+<div class="w-5 h-5 bg-white rounded-full shadow-sm"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Weight-Loss & Deficit Intelligence Section -->
+<div class="bg-surface-container-lowest rounded-[28px] p-space-lg shadow-[0_8px_24px_rgba(0,0,0,0.04)] mb-space-md">
+<div class="flex items-center justify-between mb-space-sm">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed">
+<span class="material-symbols-outlined text-[18px]">trending_down</span>
+</div>
+<div>
+<h2 class="font-title-md text-title-md text-on-surface">Metabolic Deficit Today</h2>
+<p class="font-caption text-caption text-primary font-semibold">Ahead of schedule by 110 kcal</p>
+</div>
+</div>
+<div class="text-right">
+<div class="font-data-metric-lg text-data-metric-lg text-primary font-bold leading-none">-420</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">kcal net</span>
+</div>
+</div>
+<!-- Trajectory Progress Bar -->
+<div class="my-space-sm">
+<div class="flex justify-between font-caption text-caption text-on-surface-variant mb-1">
+<span>Daily Deficit Progress (84%)</span>
+<span class="font-bold text-on-surface">420 / 500 kcal</span>
+</div>
+<div class="w-full h-3 rounded-full bg-surface-container-high overflow-hidden p-0.5">
+<div class="h-full rounded-full bg-gradient-to-r from-primary-container to-primary" style="width: 84%;"></div>
+</div>
+</div>
+<!-- Post-Dinner Recommendation Sub-Card -->
+<div class="mt-space-md p-space-md rounded-2xl bg-surface-container-low flex items-center justify-between gap-3">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-10 h-10 rounded-full bg-surface-container-lowest text-primary shadow-sm flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">directions_walk</span>
+</div>
+<div class="min-w-0">
+<div class="font-title-md text-caption font-bold text-on-surface truncate">Post-Dinner 15-min Cadence Walk</div>
+<div class="font-caption text-caption text-on-surface-variant truncate">+1,650 steps • Burns ~95 kcal fat</div>
+</div>
+</div>
+<button class="py-2 px-3.5 rounded-full bg-primary-fixed text-on-primary-fixed hover:bg-primary hover:text-on-primary font-caption text-caption font-bold transition-all flex-shrink-0 shadow-sm">
+        Launch
+      </button>
+</div>
+</div>
+<!-- Community Stride Spotlight -->
+<div class="bg-surface-container-lowest rounded-[28px] p-space-lg shadow-sm mb-space-md">
+<div class="flex items-center justify-between mb-3">
+<span class="font-title-md text-title-md text-on-surface">Evening Community Movers</span>
+<span class="font-caption text-caption text-secondary font-bold">42 nearby</span>
+</div>
+<div class="flex items-center gap-space-sm overflow-x-auto no-scrollbar py-1">
+<div class="flex items-center gap-2 p-2 rounded-2xl bg-surface-container-low flex-shrink-0 pr-4">
+<div class="w-9 h-9 rounded-full overflow-hidden shadow-xs">
+<img class="w-full h-full object-cover" data-alt="A portrait of a cheerful fit female runner wearing high-vis sports attire and earbuds against an urban park trail at dusk." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDeBjmGlyX3t2vFcYGyzwMHpPaAQZ5CRMN1-qjQUH91kIz3fsvlT0RfBVVTnLv1KV8epcEomJxay2IqLl446aqtYUliK6P2ktGlF9IWaRYJ17vJ4I8IE7RApjGeH6WvRS-_vtWkMrTXDTCwJmLCQVddL2Uyda0oCflrVcG0tAkhsWEMUpnxxm5nvo1G5s_wdQ2fQ0P0DHchbn06otTMLSCfaPT1mn3y58O4TMf_WM"/>
+</div>
+<div>
+<div class="font-caption text-caption font-bold text-on-surface">Maya T.</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant">8.9k / 10k</div>
+</div>
+</div>
+<div class="flex items-center gap-2 p-2 rounded-2xl bg-surface-container-low flex-shrink-0 pr-4">
+<div class="w-9 h-9 rounded-full overflow-hidden shadow-xs">
+<img class="w-full h-full object-cover" data-alt="Portrait of an athletic man in modern activewear smiling outdoors in city evening lighting, sporty aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAT6O9chaQY_ADHChXSPULGulKai0tarteonGTyDoR2r7wCC-H0kx2DPWqyJU6x-v9ii-rhTt4pEmiZf2SluLEI74GT_gPXPXcoypVnb6NDtYa8N4Ub_cfxMpF1QPVPrw2xo6YzWdgsk6mTnXy48CJdIf_zZoxynoP0qsXKhDjan7mejRFf3sEOgPuzSj0xXo2njKyr2-dym1Hbx4mK1uf2Vm16B39sNslbSVKExGg"/>
+</div>
+<div>
+<div class="font-caption text-caption font-bold text-on-surface">David L.</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant">11.2k / 10k</div>
+</div>
+</div>
+<div class="flex items-center gap-2 p-2 rounded-2xl bg-surface-container-low flex-shrink-0 pr-4">
+<div class="w-9 h-9 rounded-full overflow-hidden shadow-xs">
+<img class="w-full h-full object-cover" data-alt="A healthy youthful runner tying laces on modern running shoes at a brightly lit twilight running track." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBhF5GF6TiFc78KSpk5ehoscMIcwNpM7adiaAYkQ-vg5WGGu8K06fHNOBzitY4Wvlr9zbZ0JyTtLuwaKxmvkjU418s0GoJh0g0kP5UrhywfPJloAxm8rl7Csy4ZYbHEwRhseUaMrqEFs9ZSrQdmsTpGwxVjVojS4LF096X8Vr9tYCPDcW7W2MthgeVwDc6EoMcPymNV9FYOiZQbqgr4w_hnHkBaJZjorIw-nenFxZ4"/>
+</div>
+<div>
+<div class="font-caption text-caption font-bold text-on-surface">Kora S.</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant">9.4k / 10k</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Voice & Chat Input Floating Bar (Dock Alignment Safe) -->
+<div class="sticky bottom-4 z-40 w-full mt-auto">
+<div class="p-1.5 pl-4 rounded-full bg-surface-container-lowest/95 backdrop-blur-xl shadow-[0_12px_32px_rgba(0,0,0,0.12)] flex items-center justify-between gap-2">
+<div class="flex items-center gap-2.5 flex-1 min-w-0">
+<span class="material-symbols-outlined text-primary text-[20px] flex-shrink-0">arrow_back_ios_new</span>
+<input class="w-full bg-transparent text-on-surface placeholder:text-on-surface-variant/60 font-body-md text-body-md focus:outline-none truncate" id="ai-chat-input" placeholder="Ask Stride AI anything about fat loss, rest..." type="text"/>
+</div>
+<div class="flex items-center gap-1.5 flex-shrink-0">
+<button aria-label="Hold to speak" class="w-10 h-10 rounded-full bg-primary-container text-on-primary flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-all" id="mic-trigger">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">mic</span>
+</button>
+<button aria-label="Send message" class="w-10 h-10 rounded-full bg-inverse-surface text-inverse-on-surface flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-all" id="send-trigger">
+<span class="material-symbols-outlined text-[18px]">arrow_upward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<script>
+  (function() {
+    // Interactive Hydration Increment
+    const addWaterBtn = document.getElementById('add-water-btn');
+    const hydrationVal = document.getElementById('hydration-val');
+    const liquidBar = document.getElementById('liquid-bar');
+    const toast = document.getElementById('water-toast');
+    let currentLiters = 1.75;
+    const maxLiters = 2.5;
+
+    if (addWaterBtn && hydrationVal && liquidBar && toast) {
+      addWaterBtn.addEventListener('click', function() {
+        if (currentLiters < maxLiters) {
+          currentLiters = Math.min(maxLiters, +(currentLiters + 0.25).toFixed(2));
+          hydrationVal.textContent = currentLiters.toFixed(2);
+          const pct = Math.min(100, Math.round((currentLiters / maxLiters) * 100));
+          liquidBar.style.height = pct + '%';
+          
+          toast.classList.remove('opacity-0');
+          setTimeout(() => {
+            toast.classList.add('opacity-0');
+          }, 1400);
+        }
+      });
+    }
+
+    // Interactive Mode Switcher
+    const voiceBtn = document.getElementById('mode-voice-btn');
+    const chatBtn = document.getElementById('mode-chat-btn');
+    const chatInput = document.getElementById('ai-chat-input');
+
+    if (voiceBtn && chatBtn && chatInput) {
+      voiceBtn.addEventListener('click', () => {
+        voiceBtn.className = 'px-3 py-1 rounded-full font-caption text-caption font-semibold bg-primary text-on-primary shadow-sm transition-all flex items-center gap-1';
+        chatBtn.className = 'px-3 py-1 rounded-full font-caption text-caption font-semibold text-on-surface-variant hover:text-on-surface transition-all flex items-center gap-1';
+        chatInput.placeholder = "Stride Voice Listening... speak now";
+      });
+
+      chatBtn.addEventListener('click', () => {
+        chatBtn.className = 'px-3 py-1 rounded-full font-caption text-caption font-semibold bg-primary text-on-primary shadow-sm transition-all flex items-center gap-1';
+        voiceBtn.className = 'px-3 py-1 rounded-full font-caption text-caption font-semibold text-on-surface-variant hover:text-on-surface transition-all flex items-center gap-1';
+        chatInput.placeholder = "Type your query for Stride AI...";
+        chatInput.focus();
+      });
+    }
+
+    // CTA Micro-interaction
+    const startStrideCta = document.getElementById('start-stride-cta');
+    if (startStrideCta) {
+      startStrideCta.addEventListener('click', function() {
+        const originalText = this.innerHTML;
+        this.innerHTML = '<span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span><span>Preparing Route...</span>';
+        setTimeout(() => {
+          this.innerHTML = '<span class="material-symbols-outlined text-[18px]">check_circle</span><span>Stride Started!</span>';
+          setTimeout(() => {
+            this.innerHTML = originalText;
+          }, 2000);
+        }, 800);
+      });
+    }
+  })();
+</script></main></body></html>
