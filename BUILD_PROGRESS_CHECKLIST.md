@@ -105,7 +105,11 @@ Developer account: "Chanchal Raj" (personal), signed in as skkhatri2024@gmail.co
 - [x] App content (10/10): Privacy policy URL, Ads = yes, Sign-in = none restricted, Target audience 18+, Government = no, Financial = none, Advertising ID = yes (ads + fraud prevention), Health = Activity & fitness + Nutrition & weight, Data safety (AdMob: approx location, app interactions, crash logs, diagnostics, device IDs; encrypted; no accounts), Content rating (IARC accepted with user approval) → ESRB E, PEGI 3, USK 0, IARC 3+
 - [x] Signed release .aab rebuilt with all fixes (versionCode 1, upload-key SHA-256 DC:90:8F:B2…:2B:90)
 - [x] .aab uploaded by user to Internal testing draft release (1 (1.0.0), API 26+, target SDK 36, 16.1 MB install); release notes set; draft saved. Preview: 0 errors, 1 warning (no testers yet). NOT published.
-- [ ] Health Connect permission declaration: not requested yet by App content after upload (re-check when the release is submitted)
+- [x] Health apps declaration completed incl. Health Connect permission justifications (READ_STEPS, ACTIVITY_RECOGNITION)
+- [x] Store settings: category Health & Fitness; contact email + website
+- [x] Internal testing release 1 (1.0.0) published to tester list 'AeroStep owner' (owner email only)
+- [x] Closed testing - Alpha: all countries, testers 'AeroStep owner', draft release with v1 + notes
+- [ ] BLOCKER: Foreground service permissions declaration (FOREGROUND_SERVICE_HEALTH → 'Health data sync, step counter') requires a YouTube video link demonstrating the persistent step-counting notification; closed release cannot be submitted until done
 - [ ] Testers list + closed test (personal accounts: 12+ testers for 14 days before production access)
 - [ ] Real AdMob app/ad-unit ids before production (AdMob signup pending); trader status (account owner)
 - [ ] "Send for review" in Publishing overview: only with explicit user go-ahead
