@@ -68,6 +68,7 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   drift_dev: ^2.35.3
   build_runner: ^2.15.1
+  flutter_launcher_icons: 0.14.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -82,6 +83,7 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/google_fonts/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

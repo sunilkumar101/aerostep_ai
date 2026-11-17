@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:health/health.dart';
 
 import '../../core/pedometer/pedometer_controller.dart';
+import '../../core/state/app_settings.dart';
 import '../../design_system/design_system.dart';
 
 enum _HealthState { checking, notInstalled, disconnected, connected, unavailable }
@@ -45,6 +46,10 @@ class _HealthSyncCardState extends ConsumerState<HealthSyncCard> with WidgetsBin
   }
 
   Future<void> _refresh() async {
+    if (kAeroDemoMode) {
+      setState(() => _state = _HealthState.connected);
+      return;
+    }
     _HealthState next;
     try {
       await _health.configure();

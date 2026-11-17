@@ -87,7 +87,16 @@ Bugs found on device and fixed:
 - **[VERIFIED PASS] 2026-11-17**
 
 ## Phase 9: Store visual assets + promo video
-- [ ] 
+- [x] App icon 512x512 32-bit PNG (`store_assets/play/icon_512.png`): charcoal tile, tangerine stride ring, cyan live dot
+- [x] Feature graphic 1024x500 24-bit PNG (`store_assets/play/feature_graphic_1024x500.png`)
+- [x] 8 framed phone screenshots 1080x1920 24-bit PNG (`store_assets/play/screenshots/`), rendered from the real app UI in demo mode: home, tracker light+dark, analysis, live walk, trends, step bingo, coach, widgets
+- [x] Launcher icons replaced (Android adaptive + legacy mipmaps, iOS AppIcon) via flutter_launcher_icons
+- [x] Fonts bundled offline (`assets/google_fonts/`, OFL licenses registered)
+- [x] 30 s 1920x1080 60 fps promo (`store_assets/play/promo_video_30s_1080p60.mp4`), HyperFrames project in `store_assets/promo_video/`
+- Notes: Trails progress / squads leaderboard left out of screenshots (demo data, see Phase 8). Video is silent (no licensed music supplied). YouTube upload not done; it needs your OK.
+- Re-render: `flutter test --dart-define=AERO_DEMO=true tool/store_assets_render_test.dart && python tool/flatten_store_pngs.py`
+- [x] ffprobe: h264 1920x1080, 60/1 fps, 1800 frames, 30.0 s, 18 MB
+- **[VERIFIED PASS] 2026-11-17**
 
 ## Phase 10: Play Console submission
 - [ ] 

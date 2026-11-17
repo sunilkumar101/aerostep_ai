@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>AeroStep AI — 30s promo</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "Jakarta"; src: url("assets/fonts/PlusJakartaSans-SemiBold.ttf"); font-weight: 600; }
+      @font-face { font-family: "Jakarta"; src: url("assets/fonts/PlusJakartaSans-Bold.ttf"); font-weight: 700; }
+      @font-face { font-family: "Jakarta"; src: url("assets/fonts/PlusJakartaSans-ExtraBold.ttf"); font-weight: 800; }
+      @font-face { font-family: "Grotesk"; src: url("assets/fonts/SpaceGrotesk-Bold.ttf"); font-weight: 700; }
+
+      :root {
+        --peach-1: #fffdfb;
+        --peach-2: #fff3ea;
+        --peach-3: #fde8d7;
+        --tangerine: #ff7a2f;
+        --tangerine-2: #ffa163;
+        --deep: #a04100;
+        --charcoal: #141416;
+        --cyan: #46cffe;
+        --ink: #1b1b1d;
+        --muted: #584238;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--peach-2); }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; font-family: "Jakarta", sans-serif; color: var(--ink); }
+
+      /* Shared background */
+      #bg { position: absolute; inset: 0; background: linear-gradient(180deg, var(--peach-1), var(--peach-2) 55%, var(--peach-3)); }
+      .star { position: absolute; width: 520px; height: 520px; }
+      .star i { position: absolute; left: 0; top: 50%; width: 100%; height: 34px; margin-top: -17px; background: rgba(232, 162, 122, 0.20); border-radius: 4px; }
+      .star i:nth-child(2) { rotate: 45deg; }
+      .star i:nth-child(3) { rotate: 90deg; }
+      .star i:nth-child(4) { rotate: 135deg; }
+      #star-a { right: -150px; top: -170px; }
+      #star-b { left: -210px; bottom: -230px; width: 460px; height: 460px; }
+      #glow { position: absolute; width: 900px; height: 900px; right: 160px; top: 90px; border-radius: 50%;
+              background: radial-gradient(circle, rgba(255, 122, 47, 0.30), rgba(255, 161, 99, 0.10) 45%, rgba(255, 161, 99, 0) 70%); }
+
+      /* Scene layout */
+      .scene { position: absolute; inset: 0; }
+      .copy { position: absolute; left: 150px; top: 0; bottom: 0; width: 860px; display: flex; flex-direction: column; justify-content: center; }
+      .kicker { align-self: flex-start; display: inline-flex; align-items: center; gap: 14px; padding: 12px 24px; border-radius: 999px;
+                background: var(--charcoal); color: #fff; font-family: "Grotesk", sans-serif; font-weight: 700; font-size: 28px; letter-spacing: 0.08em; }
+      .kicker b { width: 14px; height: 14px; border-radius: 50%; background: var(--cyan); display: block; }
+      .line { display: block; font-weight: 800; font-size: 92px; line-height: 1.06; letter-spacing: -0.035em; }
+      .line.hot { background: linear-gradient(100deg, var(--tangerine), var(--tangerine-2)); -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: 8px; }
+      .headline { margin-top: 34px; }
+      .sub { margin-top: 30px; font-weight: 600; font-size: 34px; line-height: 1.35; color: var(--muted); max-width: 780px; }
+      .phone-wrap { position: absolute; top: 0; bottom: 0; right: 230px; width: 560px; display: flex; align-items: center; justify-content: center; }
+      .phone { display: block; height: 940px; width: auto; filter: drop-shadow(0 40px 60px rgba(120, 50, 10, 0.28)); }
+      .pair { right: 120px; width: 780px; }
+      .pair .phone { height: 860px; }
+      .pair .phone + .phone { margin-left: -120px; margin-top: 140px; }
+
+      /* Intro + outro */
+      .center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+      .icon { width: 260px; height: 260px; border-radius: 64px; box-shadow: 0 30px 70px rgba(160, 65, 0, 0.35); display: block; }
+      .brand { margin-top: 44px; font-weight: 800; font-size: 120px; letter-spacing: -0.04em; }
+      .tag { margin-top: 10px; font-weight: 800; font-size: 64px; letter-spacing: -0.03em; }
+      .chips { margin-top: 44px; display: flex; gap: 18px; }
+      .chip { padding: 16px 30px; border-radius: 999px; font-family: "Grotesk", sans-serif; font-weight: 700; font-size: 28px; letter-spacing: 0.06em; }
+      .chip.dark { background: var(--charcoal); color: #fff; }
+      .chip.cyan { background: #bbe9ff; color: #001f29; }
+      .chip.peach { background: #ffdbcc; color: var(--deep); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="30" data-width="1920" data-height="1080">
+      <!-- Persistent background -->
+      <div id="bg" class="clip" data-start="0" data-duration="30" data-track-index="0">
+        <div id="glow"></div>
+        <div id="star-a" class="star"><i></i><i></i><i></i><i></i></div>
+        <div id="star-b" class="star"><i></i><i></i><i></i><i></i></div>
+      </div>
+
+      <!-- 0. Intro -->
+      <section id="s0" class="scene clip" data-start="0" data-duration="3.5" data-track-index="1">
+        <div class="center">
+          <img id="s0-icon" class="icon" src="assets/icon.png" alt="AeroStep AI icon" />
+          <div id="s0-brand" class="brand">AeroStep AI</div>
+          <div id="s0-tag" class="tag"><span class="line hot" style="font-size: 64px">Step Today, Shine Tomorrow.</span></div>
+        </div>
+      </section>
+
+      <!-- 1. Home -->
+      <section id="s1" class="scene clip" data-start="3.5" data-duration="4" data-track-index="1">
+        <div class="copy">
+          <div class="kicker"><b></b>ZERO GPS</div>
+          <div class="headline"><span class="line">Accurate steps.</span><span class="line hot">Zero battery drain.</span></div>
+          <p class="sub">Counts with your phone's hardware step sensor and works fully offline.</p>
+        </div>
+        <div class="phone-wrap"><img class="phone" src="assets/phones/home.png" alt="Home dashboard" /></div>
+      </section>
+
+      <!-- 2. Live walk -->
+      <section id="s2" class="scene clip" data-start="7.5" data-duration="4" data-track-index="1">
+        <div class="copy">
+          <div class="kicker"><b></b>ANTI-SHAKE</div>
+          <div class="headline"><span class="line">Only real walking</span><span class="line hot">counts.</span></div>
+          <p class="sub">Shakes are filtered out and counting pauses in cars, buses and on bikes.</p>
+        </div>
+        <div class="phone-wrap"><img class="phone" src="assets/phones/live_walk.png" alt="Live walk coach" /></div>
+      </section>
+
+      <!-- 3. Light + dark -->
+      <section id="s3" class="scene clip" data-start="11.5" data-duration="4" data-track-index="1">
+        <div class="copy">
+          <div class="kicker"><b></b>TWO MOODS</div>
+          <div class="headline"><span class="line">Warm light or</span><span class="line hot">espresso dark.</span></div>
+          <p class="sub">Daily rhythm, distance, energy and gait in every theme.</p>
+        </div>
+        <div class="phone-wrap pair">
+          <img class="phone" src="assets/phones/tracker_light.png" alt="Activity tracker light" />
+          <img class="phone" src="assets/phones/tracker_dark.png" alt="Activity tracker dark" />
+        </div>
+      </section>
+
+      <!-- 4. Trends -->
+      <section id="s4" class="scene clip" data-start="15.5" data-duration="4" data-track-index="1">
+        <div class="copy">
+          <div class="kicker"><b></b>TRENDS</div>
+          <div class="headline"><span class="line">Your week,</span><span class="line hot">at a glance.</span></div>
+          <p class="sub">Day, week, month and year trends. Streak Shields protect your rest days.</p>
+        </div>
+        <div class="phone-wrap"><img class="phone" src="assets/phones/trends.png" alt="Trends" /></div>
+      </section>
+
+      <!-- 5. Coach -->
+      <section id="s5" class="scene clip" data-start="19.5" data-duration="4" data-track-index="1">
+        <div class="copy">
+          <div class="kicker"><b></b>STRIDE COACH</div>
+          <div class="headline"><span class="line">Smart tips &amp;</span><span class="line hot">hydration.</span></div>
+          <p class="sub">Steps left, water and cadence drills.</p>
+        </div>
+        <div class="phone-wrap"><img class="phone" src="assets/phones/coach.png" alt="Stride coach" /></div>
+      </section>
+
+      <!-- 6. Widgets -->
+      <section id="s6" class="scene clip" data-start="23.5" data-duration="3.5" data-track-index="1">
+        <div class="copy">
+          <div class="kicker"><b></b>WIDGETS</div>
+          <div class="headline"><span class="line">Steps on your</span><span class="line hot">home screen.</span></div>
+          <p class="sub">Step ring and 1-tap water logging.</p>
+        </div>
+        <div class="phone-wrap"><img class="phone" src="assets/phones/widgets.png" alt="Widgets" /></div>
+      </section>
+
+      <!-- 7. Outro -->
+      <section id="s7" class="scene clip" data-start="27" data-duration="3" data-track-index="1">
+        <div class="center">
+          <img id="s7-icon" class="icon" src="assets/icon.png" alt="AeroStep AI icon" />
+          <div id="s7-brand" class="brand">AeroStep AI</div>
+          <div id="s7-tag" class="tag" style="color: var(--muted); font-size: 52px">Pedometer &amp; Step AI</div>
+          <div class="chips">
+            <div class="chip dark">0% GPS</div>
+            <div class="chip cyan">ANTI-SHAKE</div>
+            <div class="chip peach">NO POPUP ADS</div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      const tl = gsap.timeline({ paused: true });
+
+      // Background drift (seek-safe, finite).
+      tl.fromTo("#star-a", { rotation: 0 }, { rotation: 90, duration: 30, ease: "none" }, 0);
+      tl.fromTo("#star-b", { rotation: 0 }, { rotation: -60, duration: 30, ease: "none" }, 0);
+      tl.fromTo("#glow", { scale: 0.9 }, { scale: 1.08, duration: 15, ease: "sine.inOut", yoyo: true, repeat: 1 }, 0);
+
+      // Intro
+      tl.fromTo("#s0-icon", { scale: 0.86, rotation: -8 }, { scale: 1, rotation: 0, duration: 0.9, ease: "back.out(1.7)" }, 0);
+      tl.fromTo("#s0-brand", { y: 24 }, { y: 0, duration: 0.7, ease: "power3.out" }, 0);
+      tl.fromTo("#s0-tag", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" }, 0.8);
+      tl.to(["#s0-icon", "#s0-brand", "#s0-tag"], { y: -40, opacity: 0, duration: 0.35, ease: "power2.in", stagger: 0.04 }, 3.05);
+
+      // Feature scenes: [id, start, duration]
+      const scenes = [["#s1", 3.5, 4], ["#s2", 7.5, 4], ["#s3", 11.5, 4], ["#s4", 15.5, 4], ["#s5", 19.5, 4], ["#s6", 23.5, 3.5]];
+      for (const [id, s, d] of scenes) {
+        const kicker = `${id} .kicker`;
+        const lines = `${id} .line`;
+        const sub = `${id} .sub`;
+        const phones = `${id} .phone`;
+        tl.fromTo(phones, { y: 180, rotation: 7, opacity: 0 }, { y: 0, rotation: 0, opacity: 1, duration: 0.95, ease: "expo.out", stagger: 0.12 }, s + 0.05);
+        tl.fromTo(kicker, { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, s + 0.12);
+        tl.fromTo(lines, { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power3.out", stagger: 0.1 }, s + 0.22);
+        tl.fromTo(sub, { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, s + 0.45);
+        tl.to(phones, { y: -16, duration: d - 1.45, ease: "sine.inOut" }, s + 1.0);
+        tl.to([kicker, lines, sub, phones], { y: "-=40", opacity: 0, duration: 0.35, ease: "power2.in", stagger: 0.02 }, s + d - 0.42);
+      }
+
+      // Outro
+      tl.fromTo("#s7-icon", { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.8, ease: "back.out(1.6)" }, 27.1);
+      tl.fromTo("#s7-brand", { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, 27.35);
+      tl.fromTo("#s7-tag", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, 27.5);
+      tl.fromTo("#s7 .chip", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power3.out", stagger: 0.08 }, 27.7);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

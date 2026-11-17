@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
@@ -16,6 +17,12 @@ import 'features/unlock/reward_ad_gateway.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Fonts are bundled in assets/google_fonts (offline-first); register their OFL licenses.
+  LicenseRegistry.addLicense(() async* {
+    for (final f in ['plusjakartasans', 'spacegrotesk']) {
+      yield LicenseEntryWithLineBreaks(['google_fonts'], await rootBundle.loadString('assets/google_fonts/OFL-$f.txt'));
+    }
+  });
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   FlutterForegroundTask.initCommunicationPort();
   final prefs = await SharedPreferences.getInstance();
