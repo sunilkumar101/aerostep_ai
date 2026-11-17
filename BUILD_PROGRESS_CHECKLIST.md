@@ -112,6 +112,8 @@ Developer account: "Chanchal Raj" (personal), signed in as skkhatri2024@gmail.co
 - [x] Foreground service declaration blocker resolved by removing the service: v1.0.1 (versionCode 2) drops FOREGROUND_SERVICE, FOREGROUND_SERVICE_HEALTH, POST_NOTIFICATIONS, RECEIVE_BOOT_COMPLETED and flutter_foreground_task. Privacy policy section 3 and the full description updated (no notification claim). 40/40 tests pass.
 - [x] v1.0.1 (2) uploaded (by user); Internal testing release 2 (1.0.1) published to 'AeroStep owner'; Closed testing Alpha release 2 (1.0.1) saved with 0 errors. Foreground service declaration now lists no permissions.
 - [x] Store listing full description updated in Console (3022 chars, no notification claim); AI asset declaration "Don't label assets" saved by user (all graphics are rendered app UI)
+- [x] Closed testing testers: added email list 'Internal Testers' (23) with user approval (plus 'AeroStep owner'); review restarted to include it
+- [x] v1.0.1 device QA (Oppo CPH1937, release APK): app force-stopped at 24 steps, user walked ~50 with app closed, reopened → 86 (+62, credited on reopen). Limitation: right after install, steps before the first sensor event with the app open are not counted (no baseline yet); first test lost ~100 steps this way.
 - [x] 2026-11-17: 15 changes sent to Google for review (user approved "Send for review now"). Status: Changes in review.
 - [ ] Testers list + closed test (personal accounts: 12+ testers for 14 days before production access)
 - [ ] Real AdMob app/ad-unit ids before production (AdMob signup pending); trader status (account owner)
