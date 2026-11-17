@@ -190,3 +190,40 @@ class CadenceGate {
     return steps / secs * 60;
   }
 }
+
+/// Splits [steps] credited from a backlog evenly over the time between two
+/// counter readings, in [bucket]-sized slices aligned to the UTC epoch.
+///
+/// Without a foreground service the hardware counter is read only when the
+/// app runs, so a backlog can span hours or midnight. Spreading it keeps
+/// daily and hourly totals close to when the walking actually happened,
+/// instead of piling everything onto the moment the app was reopened.
+/// Returns (time inside slice, steps) pairs whose steps sum to [steps].
+List<(DateTime, int)> spreadBacklog(
+  int steps,
+  DateTime from,
+  DateTime to, {
+  Duration bucket = const Duration(minutes: 15),
+}) {
+  if (steps <= 0) return const [];
+  final startMs = from.toUtc().millisecondsSinceEpoch;
+  final endMs = to.toUtc().millisecondsSinceEpoch;
+  final total = endMs - startMs;
+  if (total <= bucket.inMilliseconds) return [(to, steps)];
+  final b = bucket.inMilliseconds;
+  final out = <(DateTime, int)>[];
+  var given = 0;
+  var cursor = startMs;
+  while (cursor < endMs) {
+    final sliceEnd = ((cursor ~/ b) + 1) * b;
+    final end = sliceEnd < endMs ? sliceEnd : endMs;
+    // Cumulative rounding keeps the sum exact.
+    final share = ((end - startMs) * steps / total).round() - given;
+    if (share > 0) {
+      out.add((DateTime.fromMillisecondsSinceEpoch(cursor + (end - cursor) ~/ 2, isUtc: true), share));
+      given += share;
+    }
+    cursor = end;
+  }
+  return out;
+}

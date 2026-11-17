@@ -28,7 +28,7 @@ class EngineStatus {
       );
 }
 
-/// Zero-GPS step engine.
+/// Zero-GPS step engine (runs while the app is alive; no foreground service).
 ///
 /// * Hardware step counter (`TYPE_STEP_COUNTER` / `CMPedometer`) is the only
 ///   always-on sensor, so idle battery cost is negligible.
@@ -145,8 +145,9 @@ class StepEngine {
 
     final since = lastAtMs == null ? Duration.zero : at.difference(DateTime.fromMillisecondsSinceEpoch(lastAtMs));
     final burst = batch.length >= 3 || delta >= 4;
+    final backlog = burst && since >= gate.validationWindow;
     final GateDecision d;
-    if (burst && since >= gate.validationWindow) {
+    if (backlog) {
       // Backlog flush: judge by the whole interval, not by delivery times.
       final ok = gate.acceptBacklog(delta, since);
       d = GateDecision(ok, delta - ok);
@@ -164,12 +165,19 @@ class StepEngine {
     }
 
     if (kDebugMode) {
-      debugPrint('AERO_GATE d=$delta n=${batch.length} since=${since.inSeconds}s backlog=${burst && since >= gate.validationWindow} '
+      debugPrint('AERO_GATE d=$delta n=${batch.length} since=${since.inSeconds}s backlog=$backlog '
           '+${d.committed} -${d.rejected} walking=${gate.isWalking} cad=${gate.cadenceSpm.toStringAsFixed(0)} '
           'accelCad=${_accel.cadence?.toStringAsFixed(0)} rms=${_accel.rms?.toStringAsFixed(2)} ctx=${gate.context.name}');
     }
     if (d.committed > 0) {
-      await db.addPhoneSteps(at, d.committed);
+      if (backlog && lastAtMs != null) {
+        // Steps counted while the app was closed: spread them over the gap.
+        for (final (t, n) in spreadBacklog(d.committed, DateTime.fromMillisecondsSinceEpoch(lastAtMs), at)) {
+          await db.addPhoneSteps(t, n);
+        }
+      } else {
+        await db.addPhoneSteps(at, d.committed);
+      }
       onChanged(status);
     }
   }

@@ -35,7 +35,7 @@
 <p>AeroStep requests <strong>read access to steps only</strong>. Data read from Health Connect or HealthKit is used solely to display your activity and deduplicate step counts inside the app. It is never transferred off your device, never used for advertising, never sold, and never shared with third parties. AeroStep's use of information received from Health Connect adheres to the <a href="https://support.google.com/googleplay/android-developer/answer/12991134">Health Connect Permissions policy</a>, including the Limited Use requirements. HealthKit data is never used for advertising or data mining.</p>
 
 <h2>3. Background operation</h2>
-<p>On Android, AeroStep runs a foreground service with a visible notification so step counting continues while your screen is off. It uses the hardware step counter, not GPS. You can stop it at any time from the notification settings or by uninstalling the app.</p>
+<p>AeroStep does not run a background service and never uses GPS. Your phone's hardware step counter keeps counting on its own; when you open AeroStep it reads that counter and adds the steps taken since the last reading. Nothing is sent off your device.</p>
 
 <h2>4. Advertising</h2>
 <p>AeroStep never shows popup or interstitial ads. Ads appear only when you tap "Watch Video to Unlock" to earn an optional reward. These videos are served by Google AdMob, which may collect your device's advertising ID, IP address and app interaction data to deliver and measure ads. See <a href="https://policies.google.com/technologies/partner-sites">How Google uses information from sites or apps that use its services</a>. You can reset or delete your advertising ID in your device settings, and on iOS you can decline tracking when asked.</p>
@@ -48,7 +48,7 @@
 
 <h2>7. Your choices and rights</h2>
 <ul>
-<li>Revoke motion, Health Connect, HealthKit or notification permissions at any time in system settings.</li>
+<li>Revoke motion, Health Connect or HealthKit permissions at any time in system settings.</li>
 <li>Delete all app data by clearing the app's storage or uninstalling it.</li>
 <li>If you are in the EEA/UK (GDPR) or California (CCPA/CPRA) you may request access to or deletion of personal data; because we hold no account or server-side copy of your activity data, these requests are fulfilled by the on-device controls above. For AdMob data, use Google's controls linked in section 4.</li>
 </ul>

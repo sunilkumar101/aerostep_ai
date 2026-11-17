@@ -197,4 +197,30 @@ void main() {
       expect(r.days, 1);
     });
   });
+
+  group('Backlog spreading (app closed, no foreground service)', () {
+    test('short gap stays in one slice', () {
+      final to = DateTime.utc(2026, 11, 17, 10, 10);
+      expect(spreadBacklog(500, to.subtract(const Duration(minutes: 10)), to), [(to, 500)]);
+    });
+
+    test('long gap is split evenly and sums exactly', () {
+      final from = DateTime.utc(2026, 11, 17, 8, 0);
+      final to = DateTime.utc(2026, 11, 17, 10, 0);
+      final parts = spreadBacklog(1001, from, to);
+      expect(parts.length, 8);
+      expect(parts.fold<int>(0, (a, p) => a + p.$2), 1001);
+      expect(parts.every((p) => p.$2 >= 125 && p.$2 <= 126), isTrue);
+    });
+
+    test('gap across midnight credits both days', () {
+      final from = DateTime.utc(2026, 11, 16, 23, 0);
+      final to = DateTime.utc(2026, 11, 17, 1, 0);
+      final parts = spreadBacklog(4000, from, to);
+      final day16 = parts.where((p) => p.$1.day == 16).fold<int>(0, (a, p) => a + p.$2);
+      final day17 = parts.where((p) => p.$1.day == 17).fold<int>(0, (a, p) => a + p.$2);
+      expect(day16, 2000);
+      expect(day17, 2000);
+    });
+  });
 }

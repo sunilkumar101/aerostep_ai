@@ -25,7 +25,7 @@ Source of truth: `CLAUDE.md` + `aerostep_master_build_publish_runbook.md`.
 - [x] Anti-shake / vehicle gate: 60–220 SPM sustained > 6 s + activity recognition IN_VEHICLE/ON_BICYCLE + accel shake veto
 - [x] Health Connect / HealthKit 15-min UTC bucket dedup (max per bucket), synced every 15 min
 - [x] UTC ledger (drift) with per-row offset; travel-proof local days; Streak Shield auto-deploy
-- [x] Android foreground service (type `health`) + persistent notification; 1-tap OEM battery wizard (native MethodChannel in MainActivity.kt)
+- [x] ~~Android foreground service (type `health`) + persistent notification~~ removed in 1.0.1+2 (Play requires a YouTube demo for FOREGROUND_SERVICE_HEALTH; user chose to skip the video). The hardware counter keeps counting while the app is closed; the backlog is credited on next open and spread evenly over the gap (`spreadBacklog`). 1-tap OEM battery wizard kept (native MethodChannel in MainActivity.kt)
 - [x] Unit tests: `test/pedometer_core_test.dart` — 20/20 pass
 - Note: `disable_battery_optimization` removed (abandoned, breaks AGP 9) — replaced by native intents.
 - **[VERIFIED PASS] 2026-11-17T11:10Z** (on-device behaviour pending Phase 7)
@@ -109,7 +109,8 @@ Developer account: "Chanchal Raj" (personal), signed in as skkhatri2024@gmail.co
 - [x] Store settings: category Health & Fitness; contact email + website
 - [x] Internal testing release 1 (1.0.0) published to tester list 'AeroStep owner' (owner email only)
 - [x] Closed testing - Alpha: all countries, testers 'AeroStep owner', draft release with v1 + notes
-- [ ] BLOCKER: Foreground service permissions declaration (FOREGROUND_SERVICE_HEALTH → 'Health data sync, step counter') requires a YouTube video link demonstrating the persistent step-counting notification; closed release cannot be submitted until done
+- [x] Foreground service declaration blocker resolved by removing the service: v1.0.1 (versionCode 2) drops FOREGROUND_SERVICE, FOREGROUND_SERVICE_HEALTH, POST_NOTIFICATIONS, RECEIVE_BOOT_COMPLETED and flutter_foreground_task. Privacy policy section 3 and the full description updated (no notification claim). 40/40 tests pass.
+- [ ] Upload v1.0.1 (2) .aab to Internal testing + Closed testing Alpha (replacing v1), then send for review
 - [ ] Testers list + closed test (personal accounts: 12+ testers for 14 days before production access)
 - [ ] Real AdMob app/ad-unit ids before production (AdMob signup pending); trader status (account owner)
 - [ ] "Send for review" in Publishing overview: only with explicit user go-ahead

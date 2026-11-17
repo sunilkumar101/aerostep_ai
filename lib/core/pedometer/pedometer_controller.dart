@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -13,11 +12,13 @@ import '../state/activity_state.dart';
 import '../state/app_settings.dart';
 import 'snapshot_builder.dart';
 import 'step_engine.dart';
-import 'step_service.dart';
 
-/// Main-isolate coordinator: starts the Android foreground service (or a
-/// local engine on iOS / when the service is refused) and republishes the
-/// ledger into [activityProvider] whenever it changes.
+/// Main-isolate coordinator: runs the [StepEngine] while the app is alive and
+/// republishes the ledger into [activityProvider] whenever it changes.
+///
+/// No foreground service: the hardware step counter keeps counting on its
+/// own while the app is closed, and the engine credits that backlog (spread
+/// over the elapsed time) the next time the app starts or resumes.
 class PedometerController with WidgetsBindingObserver {
   PedometerController(this.ref);
   final Ref ref;
@@ -35,46 +36,27 @@ class PedometerController with WidgetsBindingObserver {
     _started = true;
     WidgetsBinding.instance.addObserver(this);
 
-    var serviceRunning = false;
     if (Platform.isAndroid) {
       await Permission.activityRecognition.request();
-      if (await FlutterForegroundTask.checkNotificationPermission() != NotificationPermission.granted) {
-        await FlutterForegroundTask.requestNotificationPermission();
-      }
-      FlutterForegroundTask.addTaskDataCallback(_onTaskData);
-      StepService.init();
-      if (await Permission.activityRecognition.isGranted) {
-        serviceRunning = await StepService.start();
-      }
     }
 
-    if (!serviceRunning) {
-      final engine = _localEngine = StepEngine(
-        db: _db,
-        prefs: ref.read(sharedPrefsProvider),
-        autoPauseVehicles: ref.read(userProfileProvider).autoPauseVehicles,
-        onChanged: (s) {
-          _status = s;
-          unawaited(refresh());
-        },
-      );
-      await engine.start();
-    }
+    final engine = _localEngine = StepEngine(
+      db: _db,
+      prefs: ref.read(sharedPrefsProvider),
+      autoPauseVehicles: ref.read(userProfileProvider).autoPauseVehicles,
+      onChanged: (s) {
+        _status = s;
+        unawaited(refresh());
+      },
+    );
+    await engine.start();
 
     _refreshTimer = Timer.periodic(const Duration(seconds: 30), (_) => refresh());
     await refresh();
   }
 
-  void _onTaskData(Object data) {
-    if (data is Map) {
-      _status = EngineStatus.fromJson(data);
-      unawaited(refresh());
-    }
-  }
-
   void setAutoPause(bool v) {
     _localEngine?.autoPauseVehicles = v;
-    if (Platform.isAndroid) FlutterForegroundTask.sendDataToTask({'autoPause': v});
   }
 
   Future<bool> requestHealthAccess() async {
@@ -140,7 +122,6 @@ class PedometerController with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _refreshTimer?.cancel();
-    if (Platform.isAndroid) FlutterForegroundTask.removeTaskDataCallback(_onTaskData);
     unawaited(_localEngine?.stop());
   }
 }
