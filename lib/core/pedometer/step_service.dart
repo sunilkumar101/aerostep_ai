@@ -3,10 +3,12 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/aero_database.dart';
+import '../widgets/home_widget_bridge.dart';
 import 'step_engine.dart';
 import 'streak.dart';
 
@@ -84,6 +86,12 @@ class _StepTaskHandler extends TaskHandler {
     final entries = await db.entriesSince(now.toUtc().subtract(const Duration(days: 2)));
     final steps = dailyTotals(entries)[dayKey(now)] ?? 0;
     final vehicle = _engine?.gate.vehicleDetected ?? false;
+    // Keep home-screen widgets live even while the app UI is closed.
+    try {
+      await HomeWidget.saveWidgetData<int>('steps', steps);
+      await HomeWidget.updateWidget(qualifiedAndroidName: HomeWidgetBridge.androidSmall);
+      await HomeWidget.updateWidget(qualifiedAndroidName: HomeWidgetBridge.androidBento);
+    } catch (_) {}
     await FlutterForegroundTask.updateService(
       notificationTitle: '${_fmt.format(steps)} steps today',
       notificationText: vehicle ? 'Vehicle detected • counting paused' : 'Zero GPS • Anti-Shake active',

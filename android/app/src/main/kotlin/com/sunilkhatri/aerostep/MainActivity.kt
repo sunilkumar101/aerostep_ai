@@ -44,6 +44,9 @@ class MainActivity : FlutterFragmentActivity() {
     /** Vendor auto-start managers (Xiaomi, Oppo/Realme, Vivo, OnePlus, Huawei...). */
     private fun autoStartIntents() = listOf(
         component("com.miui.securitycenter", "com.miui.permcenter.autostart.AutoStartManagementActivity"),
+        // ColorOS 11+ (Oppo / Realme): exported action + relocated activity.
+        Intent("com.coloros.safecenter.permission.startup.StartupAppListActivity"),
+        component("com.coloros.safecenter", "com.coloros.safecenter.startupapp.view.StartupAppListActivity"),
         component("com.coloros.safecenter", "com.coloros.safecenter.permission.startup.StartupAppListActivity"),
         component("com.coloros.safecenter", "com.coloros.safecenter.startupapp.StartupAppListActivity"),
         component("com.oppo.safe", "com.oppo.safe.permission.startup.StartupAppListActivity"),

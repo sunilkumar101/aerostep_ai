@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_activity_recognition/flutter_activity_recognition.dart';
 import 'package:pedometer/pedometer.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -62,6 +63,12 @@ class StepEngine {
   bool _running = false;
 
   static const _lastRawKey = 'engine_last_raw_steps';
+  static const _lastRawAtKey = 'engine_last_raw_at_ms';
+  final _rawQueue = <(int, DateTime)>[];
+  Timer? _flushTimer;
+
+  /// Accelerometer RMS (m/s²) above which motion is treated as shaking.
+  static const violentRms = 8.0;
 
   bool get running => _running;
 
@@ -82,11 +89,12 @@ class StepEngine {
     );
 
     try {
-      final ar = FlutterActivityRecognition.instance;
-      var perm = await ar.checkPermission();
-      if (perm != ActivityPermission.GRANTED) perm = await ar.requestPermission();
-      if (perm == ActivityPermission.GRANTED) {
-        _activitySub = ar.activityStream.listen(_onActivity, onError: (Object e) => debugPrint('activity: $e'));
+      // The plugin's permission calls need an Activity, which the background
+      // service isolate doesn't have; its event stream only needs a Context.
+      // The main isolate requests the permission, so here we only check it.
+      if (await Permission.activityRecognition.isGranted) {
+        _activitySub = FlutterActivityRecognition.instance.activityStream
+            .listen(_onActivity, onError: (Object e) => debugPrint('activity: $e'));
       }
     } catch (e) {
       debugPrint('StepEngine activity recognition unavailable: $e');
@@ -104,6 +112,7 @@ class StepEngine {
     await _stopAccel();
     _tick?.cancel();
     _healthTimer?.cancel();
+    _flushTimer?.cancel();
   }
 
   Future<void> syncHealth() async {
@@ -111,23 +120,53 @@ class StepEngine {
     if (n > 0) onChanged(status);
   }
 
-  /// Visible for tests: process a cumulative hardware counter reading.
-  Future<void> _onRawCount(int raw, DateTime at) async {
+  /// Raw counter readings are coalesced briefly: when the screen is off the
+  /// OS queues step events and later delivers them in one burst, all stamped
+  /// with the delivery time.
+  void _onRawCount(int raw, DateTime at) {
+    _rawQueue.add((raw, at));
+    _flushTimer?.cancel();
+    _flushTimer = Timer(const Duration(milliseconds: 350), () => unawaited(_flushRaw()));
+  }
+
+  Future<void> _flushRaw() async {
+    if (_rawQueue.isEmpty) return;
+    final batch = List.of(_rawQueue);
+    _rawQueue.clear();
+    final (raw, at) = batch.last;
     final last = prefs.getInt(_lastRawKey);
+    final lastAtMs = prefs.getInt(_lastRawAtKey);
     await prefs.setInt(_lastRawKey, raw);
+    await prefs.setInt(_lastRawAtKey, at.millisecondsSinceEpoch);
     if (last == null) return; // first reading establishes the baseline
     // Counter resets to 0 on reboot.
     final delta = raw >= last ? raw - last : raw;
     if (delta <= 0) return;
 
-    if (!gate.isWalking) _startAccel();
-    final d = gate.addSteps(delta, at);
-    if (gate.isWalking) {
-      _walkingSince ??= at;
-      // Rhythm proven for 30 s: drop the accelerometer to save battery.
-      if (at.difference(_walkingSince!) > const Duration(seconds: 30)) unawaited(_stopAccel());
-    } else {
+    final since = lastAtMs == null ? Duration.zero : at.difference(DateTime.fromMillisecondsSinceEpoch(lastAtMs));
+    final burst = batch.length >= 3 || delta >= 4;
+    final GateDecision d;
+    if (burst && since >= gate.validationWindow) {
+      // Backlog flush: judge by the whole interval, not by delivery times.
+      final ok = gate.acceptBacklog(delta, since);
+      d = GateDecision(ok, delta - ok);
       _walkingSince = null;
+    } else {
+      if (!gate.isWalking) _startAccel();
+      d = gate.addSteps(delta, at);
+      if (gate.isWalking) {
+        _walkingSince ??= at;
+        // Rhythm proven for 30 s: drop the accelerometer to save battery.
+        if (at.difference(_walkingSince!) > const Duration(seconds: 30)) unawaited(_stopAccel());
+      } else {
+        _walkingSince = null;
+      }
+    }
+
+    if (kDebugMode) {
+      debugPrint('AERO_GATE d=$delta n=${batch.length} since=${since.inSeconds}s backlog=${burst && since >= gate.validationWindow} '
+          '+${d.committed} -${d.rejected} walking=${gate.isWalking} cad=${gate.cadenceSpm.toStringAsFixed(0)} '
+          'accelCad=${_accel.cadence?.toStringAsFixed(0)} rms=${_accel.rms?.toStringAsFixed(2)} ctx=${gate.context.name}');
     }
     if (d.committed > 0) {
       await db.addPhoneSteps(at, d.committed);
@@ -167,7 +206,12 @@ class StepEngine {
       _accelSub = accelerometerEventStream(samplingPeriod: const Duration(microseconds: 8333)).listen(
         (e) {
           _accel.add(e.timestamp, e.x, e.y, e.z);
-          gate.updateAccelCadence(_accel.cadence);
+          // Veto only on violent motion (hand shaking). The accelerometer's
+          // zero-crossing cadence counts ~2 peaks per real step (heel strike +
+          // push-off), so it must not be compared against the step band.
+          // Field data (Oppo CPH1937): walking RMS 1.4–3.6 m/s².
+          final violent = (_accel.rms ?? 0) > violentRms;
+          gate.updateAccelCadence(violent ? 999 : null);
         },
         onError: (Object e) => debugPrint('accelerometer: $e'),
         cancelOnError: true,

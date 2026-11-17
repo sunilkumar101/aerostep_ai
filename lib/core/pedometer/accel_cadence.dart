@@ -31,6 +31,15 @@ class AccelCadenceEstimator {
 
   void reset() => _samples.clear();
 
+  /// RMS of the de-meaned acceleration magnitude (m/s²) over the window.
+  /// Walking with the phone in a pocket/hand is typically 1.5–5 m/s²;
+  /// vigorous hand shaking is far higher.
+  double? get rms {
+    if (_samples.length < 20) return null;
+    final mean = _samples.fold<double>(0, (a, s) => a + s.$2) / _samples.length;
+    return math.sqrt(_samples.fold<double>(0, (a, s) => a + math.pow(s.$2 - mean, 2)) / _samples.length);
+  }
+
   /// Cadence in cycles/minute, or null when there is too little data or motion.
   double? get cadence {
     if (_samples.length < 20) return null;

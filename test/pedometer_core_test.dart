@@ -81,6 +81,26 @@ void main() {
     });
   });
 
+  group('Screen-off backlog (batched step counter delivery)', () {
+    test('5-minute locked walk delivered in one burst is credited', () {
+      final gate = CadenceGate();
+      expect(gate.acceptBacklog(520, const Duration(minutes: 5)), 520); // 104 SPM
+    });
+
+    test('impossible backlog (2,000 steps in 5 min) is rejected', () {
+      expect(CadenceGate().acceptBacklog(2000, const Duration(minutes: 5)), 0);
+    });
+
+    test('backlog while in a vehicle is rejected', () {
+      final gate = CadenceGate()..updateContext(MotionContext.vehicle);
+      expect(gate.acceptBacklog(300, const Duration(minutes: 10)), 0);
+    });
+
+    test('burst over too short an interval is not treated as backlog', () {
+      expect(CadenceGate().acceptBacklog(10, const Duration(seconds: 2)), 0);
+    });
+  });
+
   group('Accelerometer cadence estimator', () {
     double? run(double hz, {double amp = 3}) {
       final e = AccelCadenceEstimator();

@@ -10,6 +10,7 @@ import '../../app/routes.dart';
 import '../../app/shell_state.dart';
 import '../../core/state/activity_state.dart';
 import '../../design_system/design_system.dart';
+import 'health_sync_card.dart';
 import 'home_common.dart';
 
 /// Home tab, sub-view 1: Daily Activity Tracker. One widget that renders the
@@ -36,6 +37,7 @@ class _ActivityTrackerViewState extends ConsumerState<ActivityTrackerView> {
         const SubViewSwitcher.home(),
         _StatusRow(dark: dark),
         if (dark) _DarkHero(a: a) else _LightHero(a: a),
+        const HealthSyncCard(),
         _EnergyGaitRow(a: a),
         const _VitalsRow(),
         if (!_coachDismissed) _CoachInsight(onDismiss: () => setState(() => _coachDismissed = true)),

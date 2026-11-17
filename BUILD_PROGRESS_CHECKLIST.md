@@ -57,7 +57,25 @@ Source of truth: `CLAUDE.md` + `aerostep_master_build_publish_runbook.md`.
 - **[VERIFIED PASS — URLs live] 2026-11-17**
 
 ## Phase 7: USB device QA + signed .aab
-- [ ] 
+Device: OPPO CPH1937 (A9 2020), ColorOS, Android 11 / API 30, hardware step counter + accelerometer.
+- [x] 1. Real walk test — 100 counted steps → app +96 (hardware sensor 96%, gate rejected 0 of the steps the sensor reported). Ring, notification and widget data agree.
+- [x] 2. 15 s hand-shake test — count unchanged (86 → 86).
+- [x] 3. Locked-screen walk — foreground service (type `health`) survived; screen-off batches credited via backlog logic (106 → 384).
+- [x] 4. 1-Tap OEM battery — `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` dialog shown; app now on deviceidle whitelist. ColorOS 11 AutoStart intent added.
+- [x] 5. Light + Warm Espresso dark — all main tabs, sub-views, coach, unlock, widgets captured on device (`build/device_shots/`, not committed); no overflow / Flutter errors in logcat.
+- [ ] 6. Health Connect — "Sync watch steps" card detects Health Connect is NOT installed on this phone and offers Install. Permission + dedup on device pending user installing Health Connect. (Dedup logic covered by unit tests.)
+- [x] 7. AdMob rewarded (Google TEST ad) — played, reward callback fired, Streak Shields 2 → 3.
+- [x] 8. Home widget — 2x2 widget pinned via in-app button; provider instance registered; widget data (steps/goal/kcal) populated; service now refreshes widgets while UI is closed.
+- [x] logcat: no FATAL / `E flutter` from AeroStep during the session.
+- [x] Upload keystore generated (`android/upload-keystore.jks` + `android/key.properties`, git-ignored — BACK THESE UP).
+- [x] Signed `build/app/outputs/bundle/release/app-release.aab`.
+
+Bugs found on device and fixed:
+- Screen-off step batches were rejected as impossible cadence → backlog credit by elapsed interval.
+- Accelerometer zero-crossing cadence (~2 peaks per step) was vetoing real walking → veto now only on violent motion (RMS > 8 m/s²; walking measured 1.4–3.6).
+- Activity recognition failed in the service isolate (needed an Activity) → check permission via permission_handler, listen to stream directly.
+- `disable_battery_optimization` broke AGP 9 → native MethodChannel in MainActivity.
+- **[VERIFIED PASS — 7/8 on device; Health Connect pending install] 2026-11-17**
 
 ## Phase 8: ASO metadata
 - [ ] 

@@ -142,6 +142,25 @@ class CadenceGate {
     return GateDecision(0, rejected);
   }
 
+  /// Steps the OS delivers as a batched backlog (non-wakeup step counters
+  /// hold events while the screen is off and flush them all at once). Their
+  /// arrival times are meaningless, so judge them by the whole interval since
+  /// the previous reading: credit them when that interval is long enough and
+  /// the implied cadence is humanly possible, and the user wasn't in a vehicle.
+  /// Returns the number of steps to commit.
+  int acceptBacklog(int delta, Duration sinceLastReading) {
+    if (delta <= 0) return 0;
+    if (vehicleDetected) return 0;
+    if (sinceLastReading < validationWindow) return 0;
+    final spm = delta / (sinceLastReading.inMilliseconds / 60000);
+    if (spm > maxSpm) return 0;
+    // A backlog ends any in-progress live bout; the next live steps re-validate.
+    _pending.clear();
+    _recent.clear();
+    _walking = false;
+    return delta;
+  }
+
   /// Call periodically (e.g. every second). Expires a stale pending buffer.
   GateDecision tick(DateTime now) {
     final last = _lastEvent;

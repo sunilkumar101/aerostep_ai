@@ -1,8 +1,9 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 /// Brands the setup wizard knows how to guide.
 enum OemBrand { samsung, xiaomi, realme, oppo, vivo, oneplus, pixel, other }
@@ -51,7 +52,11 @@ abstract final class OemBattery {
   static Future<bool> protect(OemBrand brand) async {
     if (!Platform.isAndroid) return true;
     try {
-      await _channel.invokeMethod<bool>('requestIgnoreBatteryOptimizations');
+      if (!await isProtected()) {
+        await _channel.invokeMethod<bool>('requestIgnoreBatteryOptimizations');
+        // Let the user answer the system dialog before opening the next page.
+        await _nextResume();
+      }
       switch (brand) {
         case OemBrand.xiaomi:
         case OemBrand.oppo:
@@ -72,5 +77,19 @@ abstract final class OemBattery {
       debugPrint('OemBattery.protect: $e');
       return false;
     }
+  }
+
+  /// Completes when the app returns to the foreground (or after a timeout).
+  static Future<void> _nextResume() {
+    final done = Completer<void>();
+    late final AppLifecycleListener listener;
+    var wentAway = false;
+    listener = AppLifecycleListener(
+      onStateChange: (s) {
+        if (s != AppLifecycleState.resumed) wentAway = true;
+        if (s == AppLifecycleState.resumed && wentAway && !done.isCompleted) done.complete();
+      },
+    );
+    return done.future.timeout(const Duration(seconds: 90), onTimeout: () {}).whenComplete(listener.dispose);
   }
 }
