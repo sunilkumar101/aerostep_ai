@@ -104,8 +104,8 @@ Developer account: "Chanchal Raj" (personal), signed in as skkhatri2024@gmail.co
 - [x] Main store listing saved: short + full description, 512 icon, 1024x500 feature graphic, 8 phone screenshots (ordered)
 - [x] App content (10/10): Privacy policy URL, Ads = yes, Sign-in = none restricted, Target audience 18+, Government = no, Financial = none, Advertising ID = yes (ads + fraud prevention), Health = Activity & fitness + Nutrition & weight, Data safety (AdMob: approx location, app interactions, crash logs, diagnostics, device IDs; encrypted; no accounts), Content rating (IARC accepted with user approval) → ESRB E, PEGI 3, USK 0, IARC 3+
 - [x] Signed release .aab rebuilt with all fixes (versionCode 1, upload-key SHA-256 DC:90:8F:B2…:2B:90)
-- [ ] Upload .aab to Internal testing draft: 72 MB exceeds the browser tool's 10 MB upload limit; user drags it in
-- [ ] Health Connect permission declaration (appears after the .aab with READ_STEPS is uploaded)
+- [x] .aab uploaded by user to Internal testing draft release (1 (1.0.0), API 26+, target SDK 36, 16.1 MB install); release notes set; draft saved. Preview: 0 errors, 1 warning (no testers yet). NOT published.
+- [ ] Health Connect permission declaration: not requested yet by App content after upload (re-check when the release is submitted)
 - [ ] Testers list + closed test (personal accounts: 12+ testers for 14 days before production access)
 - [ ] Real AdMob app/ad-unit ids before production (AdMob signup pending); trader status (account owner)
 - [ ] "Send for review" in Publishing overview: only with explicit user go-ahead
