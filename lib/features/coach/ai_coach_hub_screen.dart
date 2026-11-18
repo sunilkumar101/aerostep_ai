@@ -81,14 +81,13 @@ class _AiCoachHubScreenState extends ConsumerState<AiCoachHubScreen> {
   String _stats() {
     final a = ref.read(activityProvider);
     final h = ref.read(hydrationProvider);
-    final profile = ref.read(userProfileProvider);
     return 'Steps today: ${a.steps} of goal ${a.goal} (${a.percent}%), steps left: ${a.remaining}\n'
         'Distance: ${a.distanceKm.toStringAsFixed(1)} km, active minutes: ${a.activeMinutes}, active kcal: ${a.kcal}\n'
         'Cadence now: ${a.cadenceSpm} spm, streak: ${a.streakDays} days, Streak Shields: ${ref.read(streakShieldProvider)}\n'
         'This week steps (Mon..Sun): ${a.weeklySteps.join(', ')}\n'
         'Brisk walking time needed to finish the goal today: about ${minutesForSteps(a.remaining, a.cadenceSpm)} minutes '
         '(~$kBriskCadenceSpm steps per minute)\n'
-        'Water: ${h.ml} of ${h.goalMl} ml, body weight: ${profile.weightKg.round()} kg';
+        'Water: ${h.ml} of ${h.goalMl} ml';
   }
 
   /// One-time disclosure before anything is sent to the online AI.

@@ -386,7 +386,7 @@ class _PhoneFrame extends StatelessWidget {
 
 Future<ProviderContainer> _container({required bool dark}) async {
   // ignore: invalid_use_of_visible_for_testing_member
-  SharedPreferences.setMockInitialValues({'onboarded': true, 'theme_mode': dark ? 'dark' : 'light', 'profile_name': 'Sunil Kumar'});
+  SharedPreferences.setMockInitialValues({'onboarded': true, 'theme_mode': dark ? 'dark' : 'light', 'profile_name': 'Alex Morgan'});
   final prefs = await SharedPreferences.getInstance();
   return ProviderContainer(overrides: [sharedPrefsProvider.overrideWithValue(prefs)]);
 }
