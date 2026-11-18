@@ -118,3 +118,16 @@ Developer account: "Chanchal Raj" (personal), signed in as skkhatri2024@gmail.co
 - [ ] Testers list + closed test (personal accounts: 12+ testers for 14 days before production access)
 - [ ] Real AdMob app/ad-unit ids before production (AdMob signup pending); trader status (account owner)
 - [x] "Send for review" in Publishing overview, with explicit user go-ahead
+
+## v1.0.2 update (2026-11-18)
+- [x] Reset today's counter to 0 (keeps history, Undo, expires at midnight); share 4:5 progress image (Instagram/Facebook via system share sheet)
+- [x] Header shows the user's own editable name + initials (no hardcoded name/photo)
+- [x] Squads: fake members/chat removed; local friends list ranked against real weekly steps
+- [x] Stride AI via Gemini API (gemini-3.5-flash-lite, fallback gemini-flash-lite-latest, then offline coach); one-time consent; key in git-ignored secrets.json (--dart-define-from-file); Android package/cert headers sent for key restriction
+- [x] Device QA on Oppo CPH1937: name edit, share sheet (Instagram/Facebook shown), reset 630→0→Undo 630, Gemini reply grounded (9,370 left ≈ 86 min), Squads empty state
+- [x] Privacy policy updated (AI Coach data to Gemini); Data safety: Fitness info + Other user-generated content (collected + shared, optional, app functionality)
+- [x] Store screenshots re-rendered (sample name "Alex Morgan", new Squads) and uploaded in order; full description updated
+- [x] Closed testing 1.0.1 approved by Google (available to testers since 2026-11-17)
+- [x] Closed testing release 3 (1.0.2) + listing + Data safety sent for review (4 changes)
+- [ ] User: restrict Gemini key in Google Cloud to com.sunilkhatri.aerostep + SHA-1 C5:25:A5:6C:DF:92:F4:F8:FB:C2:19:12:66:BF:78:63:91:37:5A:7B (Play signing) and 31:2C:88:82:1C:A2:FC:91:63:ED:BB:59:BE:11:D2:A0:52:75:1B:6F (upload)
+- [ ] Consider Gemini paid tier (free-tier data may be used by Google for model improvement)
