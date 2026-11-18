@@ -58,3 +58,7 @@ upload-keystore*
 
 # Build-time secrets (Gemini API key) - never commit
 secrets.json
+
+# HyperFrames preview cache and obsolete FGS demo capture
+store_assets/promo_video/.thumbnails/
+store_assets/play/fgs_health_demo.mp4
