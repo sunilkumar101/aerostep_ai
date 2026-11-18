@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:aerostep_ai/core/pedometer/accel_cadence.dart';
 import 'package:aerostep_ai/core/pedometer/cadence_gate.dart';
+import 'package:aerostep_ai/core/pedometer/snapshot_builder.dart';
 import 'package:aerostep_ai/core/pedometer/health_dedup.dart';
 import 'package:aerostep_ai/core/pedometer/streak.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -221,6 +222,25 @@ void main() {
       final day17 = parts.where((p) => p.$1.day == 17).fold<int>(0, (a, p) => a + p.$2);
       expect(day16, 2000);
       expect(day17, 2000);
+    });
+  });
+
+  group('Start today from zero', () {
+    test('subtracts the base from the total and the earliest hours', () {
+      final hourly = List<int>.filled(24, 0)
+        ..[7] = 300
+        ..[9] = 500
+        ..[15] = 200;
+      final steps = applyTodayReset(1000, 600, hourly);
+      expect(steps, 400);
+      expect(hourly[7], 0);
+      expect(hourly[9], 200);
+      expect(hourly[15], 200);
+      expect(hourly.fold<int>(0, (a, b) => a + b), 400);
+    });
+
+    test('never goes negative', () {
+      expect(applyTodayReset(100, 250, List<int>.filled(24, 0)), 0);
     });
   });
 }

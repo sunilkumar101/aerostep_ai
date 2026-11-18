@@ -11,6 +11,7 @@ import '../data/database_provider.dart';
 import '../state/activity_state.dart';
 import '../state/app_settings.dart';
 import 'snapshot_builder.dart';
+import 'streak.dart';
 import 'step_engine.dart';
 
 /// Main-isolate coordinator: runs the [StepEngine] while the app is alive and
@@ -74,7 +75,10 @@ class PedometerController with WidgetsBindingObserver {
     _refreshing = true;
     try {
       final profile = ref.read(userProfileProvider);
+      final prefs = ref.read(sharedPrefsProvider);
       final snap = await SnapshotBuilder(_db).build(
+        resetDay: prefs.getString(_resetDayKey),
+        resetBase: prefs.getInt(_resetBaseKey) ?? 0,
         goal: profile.stepGoal,
         strideM: profile.strideLengthM,
         weightKg: profile.weightKg,
@@ -93,6 +97,27 @@ class PedometerController with WidgetsBindingObserver {
     } finally {
       _refreshing = false;
     }
+  }
+
+  static const _resetDayKey = 'today_reset_day';
+  static const _resetBaseKey = 'today_reset_base';
+
+  /// "Start from zero": today's counter shows only steps taken after now.
+  /// Earlier steps stay in the ledger (history is not deleted) and the reset
+  /// expires automatically at midnight.
+  Future<void> resetToday() async {
+    final prefs = ref.read(sharedPrefsProvider);
+    await prefs.setString(_resetDayKey, dayKey(DateTime.now()));
+    await prefs.setInt(_resetBaseKey, await rawTodaySteps(_db));
+    await refresh();
+  }
+
+  /// Brings back the steps hidden by [resetToday].
+  Future<void> undoResetToday() async {
+    final prefs = ref.read(sharedPrefsProvider);
+    await prefs.remove(_resetDayKey);
+    await prefs.remove(_resetBaseKey);
+    await refresh();
   }
 
   @override

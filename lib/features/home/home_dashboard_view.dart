@@ -7,7 +7,9 @@ import '../../app/shell_state.dart';
 import '../../core/state/activity_state.dart';
 import '../../core/state/app_settings.dart';
 import '../../design_system/design_system.dart';
+import '../../core/pedometer/pedometer_controller.dart';
 import 'home_common.dart';
+import 'share_progress_sheet.dart';
 
 /// Home tab, sub-view 0: the "Walk today, shine tomorrow." dashboard
 /// (Stitch `aerostep_ai_home_dashboard`). Body only — MainShell owns the
@@ -46,7 +48,7 @@ class _Header extends StatelessWidget {
     final p = context.aero;
     return Row(
       children: [
-        const _ProAvatar(),
+        _ProAvatar(name: name),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -72,11 +74,31 @@ class _Header extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 2),
-              Text(
-                name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AeroText.titleMd.copyWith(color: p.text, fontWeight: FontWeight.w800),
+              Semantics(
+                button: true,
+                label: name.isEmpty ? 'Add your name' : 'Edit name, $name',
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(8),
+                  onTap: () => showEditNameDialog(context),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          name.isEmpty ? 'Add name' : name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AeroText.titleMd.copyWith(
+                            color: name.isEmpty ? p.textMuted : p.text,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(Icons.edit_rounded, size: 14, color: p.textMuted),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
@@ -114,7 +136,8 @@ class _Shadowed extends StatelessWidget {
 /// Circular runner avatar with gradient ring and a tappable PRO pill that
 /// opens the Unlock Pass screen.
 class _ProAvatar extends StatelessWidget {
-  const _ProAvatar();
+  const _ProAvatar({required this.name});
+  final String name;
 
   @override
   Widget build(BuildContext context) {
@@ -144,7 +167,19 @@ class _ProAvatar extends StatelessWidget {
                     colors: [AeroColors.tangerine, AeroColors.skyCyan],
                   ),
                 ),
-                child: const HeroCrop(size: 44, focus: HeroCrop.faceLight),
+                child: Container(
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: p.isDark ? AeroColors.espresso : Colors.white,
+                  ),
+                  child: name.isEmpty
+                      ? Icon(Icons.person_rounded, size: 24, color: p.accentText)
+                      : Text(
+                          _initials(name),
+                          style: AeroText.titleMd.copyWith(color: p.accentText, fontWeight: FontWeight.w800),
+                        ),
+                ),
               ),
               Positioned(
                 bottom: 0,
@@ -167,6 +202,40 @@ class _ProAvatar extends StatelessWidget {
       ),
     );
   }
+}
+
+String _initials(String name) {
+  final parts = name.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+  if (parts.isEmpty) return '';
+  final first = parts.first.characters.first;
+  final last = parts.length > 1 ? parts.last.characters.first : '';
+  return (first + last).toUpperCase();
+}
+
+/// Lets the user set the name shown in the header (stored on-device only).
+Future<void> showEditNameDialog(BuildContext context) async {
+  final container = ProviderScope.containerOf(context, listen: false);
+  final controller = TextEditingController(text: container.read(userProfileProvider).name);
+  final saved = await showDialog<String>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('Your name'),
+      content: TextField(
+        controller: controller,
+        autofocus: true,
+        maxLength: 30,
+        textCapitalization: TextCapitalization.words,
+        decoration: const InputDecoration(hintText: 'e.g. Ayesha'),
+        onSubmitted: (v) => Navigator.of(ctx).pop(v),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Cancel')),
+        FilledButton(onPressed: () => Navigator.of(ctx).pop(controller.text), child: const Text('Save')),
+      ],
+    ),
+  );
+  controller.dispose();
+  if (saved != null) container.read(userProfileProvider.notifier).setName(saved);
 }
 
 class _BellButton extends StatelessWidget {
@@ -597,25 +666,22 @@ class _StepHeroCard extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Material(
-                    color: Colors.white,
-                    shape: const CircleBorder(),
-                    elevation: 2,
-                    shadowColor: const Color(0x33000000),
-                    child: InkWell(
-                      customBorder: const CircleBorder(),
-                      onTap: () => ref.read(homeSubViewProvider.notifier).set(1),
-                      child: const SizedBox(
-                        width: 34,
-                        height: 34,
-                        child: Icon(
-                          Icons.arrow_forward_rounded,
-                          size: 18,
-                          color: AeroColors.tangerine,
-                          semanticLabel: 'View activity breakdown',
-                        ),
-                      ),
-                    ),
+                  _HeroRoundButton(
+                    icon: Icons.restart_alt_rounded,
+                    label: 'Start today from zero',
+                    onTap: () => _confirmReset(context, ref),
+                  ),
+                  const SizedBox(width: 6),
+                  _HeroRoundButton(
+                    icon: Icons.ios_share_rounded,
+                    label: "Share today's progress",
+                    onTap: () => showShareProgressSheet(context, a, name: ref.read(userProfileProvider).name),
+                  ),
+                  const SizedBox(width: 6),
+                  _HeroRoundButton(
+                    icon: Icons.arrow_forward_rounded,
+                    label: 'View activity breakdown',
+                    onTap: () => ref.read(homeSubViewProvider.notifier).set(1),
                   ),
                 ],
               ),
@@ -626,11 +692,67 @@ class _StepHeroCard extends ConsumerWidget {
     );
   }
 
+  static Future<void> _confirmReset(BuildContext context, WidgetRef ref) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Start today from 0?'),
+        content: const Text(
+          "Today's counter will restart at 0 and only count steps from now on. "
+          'Your history is kept, and the counter goes back to normal at midnight.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Reset to 0')),
+        ],
+      ),
+    );
+    if (ok != true || !context.mounted) return;
+    final controller = ref.read(pedometerControllerProvider);
+    await controller.resetToday();
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: const Text("Today's counter starts from 0 now."),
+          action: SnackBarAction(label: 'Undo', onPressed: () => controller.undoResetToday()),
+        ),
+      );
+  }
+
   static String _cadenceLabel(int spm) {
     if (spm >= 100) return 'Brisk Cadence • Stable';
     if (spm > 0) return 'Easy Cadence • Steady';
     return 'Cadence idle • Ready';
   }
+}
+
+class _HeroRoundButton extends StatelessWidget {
+  const _HeroRoundButton({required this.icon, required this.label, required this.onTap});
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Tooltip(
+        message: label,
+        child: Material(
+          color: Colors.white,
+          shape: const CircleBorder(),
+          elevation: 2,
+          shadowColor: const Color(0x33000000),
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: onTap,
+            child: SizedBox(
+              width: 34,
+              height: 34,
+              child: Icon(icon, size: 18, color: AeroColors.tangerine, semanticLabel: label),
+            ),
+          ),
+        ),
+      );
 }
 
 class _GlassBadge extends StatelessWidget {

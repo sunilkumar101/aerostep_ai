@@ -3,12 +3,15 @@ package com.sunilkhatri.aerostep
 import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import java.security.MessageDigest
 
 // FlutterFragmentActivity is required by the Health Connect permission contract.
 class MainActivity : FlutterFragmentActivity() {
@@ -24,6 +27,29 @@ class MainActivity : FlutterFragmentActivity() {
                     else -> result.notImplemented()
                 }
             }
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "aerostep/app")
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "signingCertSha1" -> result.success(signingCertSha1())
+                    else -> result.notImplemented()
+                }
+            }
+    }
+
+    /** SHA-1 of the signing certificate (uppercase hex, no colons) for Google API key restrictions. */
+    private fun signingCertSha1(): String? = try {
+        val signatures = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            val info = packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNING_CERTIFICATES)
+            info.signingInfo?.apkContentsSigners
+        } else {
+            @Suppress("DEPRECATION")
+            packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES).signatures
+        }
+        signatures?.firstOrNull()?.let { sig ->
+            MessageDigest.getInstance("SHA-1").digest(sig.toByteArray()).joinToString("") { "%02X".format(it) }
+        }
+    } catch (e: Exception) {
+        null
     }
 
     private fun isIgnoring(): Boolean {

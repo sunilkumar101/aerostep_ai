@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/ai/gemini_coach.dart';
 import '../../design_system/design_system.dart';
 
 enum CoachInputMode { voice, chat }
@@ -46,7 +47,7 @@ class CoachChatPanel extends StatelessWidget {
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
-                    'STRIDE AI • OFFLINE COACH',
+                    GeminiCoach.instance.enabled ? 'STRIDE AI • POWERED BY GEMINI' : 'STRIDE AI • OFFLINE COACH',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AeroText.labelCaps.copyWith(color: p.textMuted),

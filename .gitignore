@@ -55,3 +55,6 @@ upload-keystore*
 
 # Gradle outputs
 **/build/
+
+# Build-time secrets (Gemini API key) - never commit
+secrets.json

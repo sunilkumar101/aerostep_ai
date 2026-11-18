@@ -73,7 +73,7 @@ class UserProfileNotifier extends Notifier<UserProfile> {
   UserProfile build() {
     final p = ref.watch(sharedPrefsProvider);
     return UserProfile(
-      name: p.getString('profile_name') ?? 'Sunil Kumar',
+      name: p.getString('profile_name') ?? '',
       stepGoal: p.getInt('step_goal') ?? 10000,
       onboarded: p.getBool('onboarded') ?? false,
       autoPauseVehicles: p.getBool('auto_pause_vehicles') ?? true,
@@ -93,8 +93,9 @@ class UserProfileNotifier extends Notifier<UserProfile> {
   }
 
   void setName(String v) {
-    state = state.copyWith(name: v);
-    _p.setString('profile_name', v);
+    final name = v.trim();
+    state = state.copyWith(name: name);
+    _p.setString('profile_name', name);
   }
 
   void completeOnboarding() {

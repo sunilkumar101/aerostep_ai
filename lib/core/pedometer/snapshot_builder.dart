@@ -15,6 +15,8 @@ class SnapshotBuilder {
     required bool vehicle,
     required int shieldsAvailable,
     void Function(int shieldsUsed)? onShieldsUsed,
+    String? resetDay,
+    int resetBase = 0,
   }) async {
     final now = DateTime.now();
     final today = dayKey(now);
@@ -27,7 +29,12 @@ class SnapshotBuilder {
       final local = e.utc.add(Duration(minutes: e.offsetMinutes));
       hourly[local.hour] += e.steps;
     }
-    final steps = totals[today] ?? 0;
+    var steps = totals[today] ?? 0;
+    if (resetDay == today && resetBase > 0) {
+      // "Start today from zero": hide the steps counted before the reset.
+      steps = applyTodayReset(steps, resetBase, hourly);
+      totals[today] = steps;
+    }
 
     // Monday..Sunday of the current local week.
     final monday = DateTime.utc(now.year, now.month, now.day).subtract(Duration(days: now.weekday - 1));
@@ -64,4 +71,23 @@ class SnapshotBuilder {
       isVehicleDetected: vehicle,
     );
   }
+}
+
+/// Today's raw (un-reset) ledger total, used as the base when the user resets.
+Future<int> rawTodaySteps(AeroDatabase db) async {
+  final now = DateTime.now();
+  final entries = await db.entriesSince(now.toUtc().subtract(const Duration(days: 2)));
+  return dailyTotals(entries)[dayKey(now)] ?? 0;
+}
+
+/// Removes [base] steps from today's total and from the earliest hours of
+/// [hourly] (in place), so the day chart matches the reset count.
+int applyTodayReset(int raw, int base, List<int> hourly) {
+  var left = base;
+  for (var h = 0; h < hourly.length && left > 0; h++) {
+    final take = hourly[h] < left ? hourly[h] : left;
+    hourly[h] -= take;
+    left -= take;
+  }
+  return raw > base ? raw - base : 0;
 }

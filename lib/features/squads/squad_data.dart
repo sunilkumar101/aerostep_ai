@@ -2,82 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../design_system/design_system.dart';
 
-enum StandingMetric { steps, pace }
-
-/// One leaderboard entry. Pace is stored as seconds per km (lower is better).
-class SquadMember {
-  const SquadMember({
-    required this.id,
-    required this.name,
-    required this.steps,
-    required this.paceSecPerKm,
-    required this.stepsNote,
-    required this.paceNote,
-    required this.badge,
-    required this.avatarColors,
-    this.isYou = false,
-  });
-
-  final String id;
-  final String name;
-  final int steps;
-  final int paceSecPerKm;
-  final String stepsNote;
-  final String paceNote;
-  final IconData? badge;
-  final List<Color> avatarColors;
-  final bool isYou;
-
-  String get pace => '${paceSecPerKm ~/ 60}:${(paceSecPerKm % 60).toString().padLeft(2, '0')}';
-}
-
-const squadRivals = <SquadMember>[
-  SquadMember(
-    id: 'priya',
-    name: 'Priya Sharma',
-    steps: 48210,
-    paceSecPerKm: 605,
-    stepsNote: '+18% brisk cadence pace',
-    paceNote: 'Steady 122 spm cadence',
-    badge: Icons.fitness_center,
-    avatarColors: [AeroColors.tangerine, AeroColors.tangerineLight],
-  ),
-  SquadMember(
-    id: 'marcus',
-    name: 'Marcus Chen',
-    steps: 42950,
-    paceSecPerKm: 582,
-    stepsNote: 'Daily avg: 14.3k steps',
-    paceNote: 'Brisk 128 spm cadence',
-    badge: Icons.monitor_heart,
-    avatarColors: [AeroColors.telemetryCyan, AeroColors.cyanDeep],
-  ),
-  SquadMember(
-    id: 'amina',
-    name: 'Amina Diallo',
-    steps: 39120,
-    paceSecPerKm: 662,
-    stepsNote: '4-day walking streak',
-    paceNote: 'Endurance focus • 116 spm',
-    badge: Icons.bolt,
-    avatarColors: [Color(0xFF934B13), Color(0xFFE48B4F)],
-  ),
-];
-
 /// Avatar fill for the current user (readable on light and espresso-dark).
 const youAvatarColors = [Color(0xFF7A3000), AeroColors.tangerineDeep];
-
-SquadMember squadYou(String name) => SquadMember(
-  id: 'you',
-  name: name,
-  steps: 38420,
-  paceSecPerKm: 618,
-  stepsNote: '',
-  paceNote: '',
-  badge: null,
-  avatarColors: youAvatarColors,
-  isYou: true,
-);
 
 class BingoTile {
   const BingoTile({
@@ -143,31 +69,21 @@ const bingoLines = <(String, List<int>)>[
   ('Anti-diagonal', [2, 4, 6]),
 ];
 
-class PulseMessage {
-  const PulseMessage({
-    required this.author,
-    required this.text,
-    required this.at,
-    required this.colors,
-    this.isYou = false,
-  });
-  final String author;
-  final String text;
-  final DateTime at;
-  final List<Color> colors;
-  final bool isYou;
-}
-
 String initialsOf(String name) {
   final parts = name.trim().split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
   if (parts.isEmpty) return '?';
-  if (parts.length == 1) return parts.first.substring(0, 1).toUpperCase();
-  return (parts.first.substring(0, 1) + parts.last.substring(0, 1)).toUpperCase();
+  final first = parts.first.characters.first.toUpperCase();
+  if (parts.length == 1) return first;
+  return first + parts.last.characters.first.toUpperCase();
 }
 
-String timeAgo(DateTime at) {
-  final d = DateTime.now().difference(at);
-  if (d.inMinutes < 1) return 'now';
-  if (d.inMinutes < 60) return '${d.inMinutes}m ago';
-  return '${d.inHours}h ago';
+/// "Updated today" style label for a friend's last manual entry.
+String updatedLabel(DateTime updatedAtUtc, {DateTime? now}) {
+  final today = DateUtils.dateOnly(now ?? DateTime.now());
+  final day = DateUtils.dateOnly(updatedAtUtc.toLocal());
+  final days = (today.difference(day).inHours / 24).round(); // DST-safe
+  if (days <= 0) return 'Updated today';
+  if (days == 1) return 'Updated yesterday';
+  if (days < 7) return 'Updated $days days ago';
+  return 'Updated over a week ago';
 }

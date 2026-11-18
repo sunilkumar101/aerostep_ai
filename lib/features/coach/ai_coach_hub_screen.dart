@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/routes.dart';
+import '../../core/ai/gemini_coach.dart';
 import '../../core/state/activity_state.dart';
 import '../../core/state/app_settings.dart';
 import '../../design_system/design_system.dart';
@@ -32,6 +33,7 @@ class _AiCoachHubScreenState extends ConsumerState<AiCoachHubScreen> {
   final _messages = <CoachMessage>[];
   final _pending = <Timer>{};
   bool _chatOpen = false;
+  int _thinking = 0;
 
   final _input = TextEditingController();
   final _focus = FocusNode();
@@ -75,7 +77,46 @@ class _AiCoachHubScreenState extends ConsumerState<AiCoachHubScreen> {
         weightKg: ref.read(userProfileProvider).weightKg,
       );
 
-  void _send() {
+  /// Plain-text grounding for Gemini: only today's numbers, no identifiers.
+  String _stats() {
+    final a = ref.read(activityProvider);
+    final h = ref.read(hydrationProvider);
+    final profile = ref.read(userProfileProvider);
+    return 'Steps today: ${a.steps} of goal ${a.goal} (${a.percent}%), steps left: ${a.remaining}\n'
+        'Distance: ${a.distanceKm.toStringAsFixed(1)} km, active minutes: ${a.activeMinutes}, active kcal: ${a.kcal}\n'
+        'Cadence now: ${a.cadenceSpm} spm, streak: ${a.streakDays} days, Streak Shields: ${ref.read(streakShieldProvider)}\n'
+        'This week steps (Mon..Sun): ${a.weeklySteps.join(', ')}\n'
+        'Brisk walking time needed to finish the goal today: about ${minutesForSteps(a.remaining, a.cadenceSpm)} minutes '
+        '(~$kBriskCadenceSpm steps per minute)\n'
+        'Water: ${h.ml} of ${h.goalMl} ml, body weight: ${profile.weightKg.round()} kg';
+  }
+
+  /// One-time disclosure before anything is sent to the online AI.
+  Future<bool> _hasAiConsent() async {
+    final prefs = ref.read(sharedPrefsProvider);
+    if (prefs.getBool('ai_consent') ?? false) return true;
+    if (!mounted) return false;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Use online Stride AI?'),
+        content: const Text(
+          "To answer, your question and a summary of today's activity (steps, distance, water, streak) "
+          "are sent to Google's Gemini API. No name or account is sent. "
+          "Don't include sensitive personal details in your questions. "
+          'If you choose Offline, the built-in coach answers on your phone instead.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Offline')),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Use online AI')),
+        ],
+      ),
+    );
+    if (ok == true) await prefs.setBool('ai_consent', true);
+    return ok == true;
+  }
+
+  Future<void> _send() async {
     final text = _input.text.trim();
     if (text.isEmpty) {
       _focus.requestFocus();
@@ -85,16 +126,28 @@ class _AiCoachHubScreenState extends ConsumerState<AiCoachHubScreen> {
     setState(() {
       _messages.add(CoachMessage(text, fromUser: true));
       _chatOpen = true;
+      _thinking++;
     });
     _scrollToEnd();
-    late final Timer timer;
-    timer = Timer(const Duration(milliseconds: 650), () {
-      _pending.remove(timer);
-      if (!mounted) return;
-      setState(() => _messages.add(CoachMessage(_answer(text), fromUser: false)));
-      _scrollToEnd();
+
+    String answer;
+    final gemini = GeminiCoach.instance;
+    if (gemini.enabled && await _hasAiConsent()) {
+      try {
+        answer = await gemini.reply([for (final m in _messages) (m.text, m.fromUser)], _stats());
+      } catch (_) {
+        answer = '${_answer(text)}\n\n(Offline answer: Stride AI is not reachable online right now.)';
+      }
+    } else {
+      await Future<void>.delayed(const Duration(milliseconds: 650));
+      answer = _answer(text);
+    }
+    if (!mounted) return;
+    setState(() {
+      _thinking--;
+      _messages.add(CoachMessage(answer, fromUser: false));
     });
-    _pending.add(timer);
+    _scrollToEnd();
   }
 
   void _speakInsight() {
@@ -112,7 +165,7 @@ class _AiCoachHubScreenState extends ConsumerState<AiCoachHubScreen> {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         const SnackBar(
-          content: Text('Offline voice capture is coming soon. Type your question and Stride AI answers instantly.'),
+          content: Text('Voice input is coming soon. Type your question and Stride AI will answer.'),
         ),
       );
   }
@@ -138,7 +191,7 @@ class _AiCoachHubScreenState extends ConsumerState<AiCoachHubScreen> {
     // Read outside the Scaffold so the real keyboard inset is visible.
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     final bottomSafe = keyboardOpen ? 0.0 : MediaQuery.paddingOf(context).bottom;
-    final pending = _pending.isNotEmpty;
+    final pending = _pending.isNotEmpty || _thinking > 0;
 
     return Scaffold(
       backgroundColor: Colors.transparent,

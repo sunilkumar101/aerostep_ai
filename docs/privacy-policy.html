@@ -18,7 +18,7 @@
 <body>
 <main>
 <h1>AeroStep AI: Smart Pedometer &amp; Walk Coach — Privacy Policy</h1>
-<p class="meta">Effective date: 17 November 2026 · App ID: com.sunilkhatri.aerostep</p>
+<p class="meta">Effective date: 18 November 2026 · App ID: com.sunilkhatri.aerostep</p>
 
 <p>AeroStep AI ("AeroStep", "we") is a step counter and walking coach. This policy explains what data the app uses, why, and the choices you have. In short: <strong>your activity data stays on your device</strong>, we never use GPS for step counting, and we do not sell personal data.</p>
 
@@ -28,11 +28,12 @@
 <tr><td>Step count, cadence, walking/vehicle activity state</td><td>Phone motion sensors (step counter, accelerometer, activity recognition)</td><td>Count steps, filter out shakes and vehicle rides, show progress and streaks</td><td>On your device only</td></tr>
 <tr><td>Steps from Google Health Connect / Apple Health</td><td>Health Connect (Android) or HealthKit (iOS), only with your permission</td><td>Merge smartwatch and phone steps without double-counting</td><td>On your device only</td></tr>
 <tr><td>Daily goal, water intake, streak shields, settings</td><td>What you enter in the app</td><td>Goals, hydration tracking, streak protection</td><td>On your device only</td></tr>
+<tr><td>AI Coach questions and a summary of today's activity (steps, distance, active minutes, calories, water, streak, body weight)</td><td>What you type into Stride AI chat, after you agree to use the online AI</td><td>Generate the coach's answer</td><td>Sent to Google's Gemini API for that request (see section 5)</td></tr>
 <tr><td>Advertising ID, device and app diagnostics</td><td>Google AdMob SDK</td><td>Serve optional reward videos you choose to watch; measure and prevent ad fraud</td><td>Processed by Google (see section 4)</td></tr>
 </table>
 
 <h2>2. Health Connect &amp; Apple Health</h2>
-<p>AeroStep requests <strong>read access to steps only</strong>. Data read from Health Connect or HealthKit is used solely to display your activity and deduplicate step counts inside the app. It is never transferred off your device, never used for advertising, never sold, and never shared with third parties. AeroStep's use of information received from Health Connect adheres to the <a href="https://support.google.com/googleplay/android-developer/answer/12991134">Health Connect Permissions policy</a>, including the Limited Use requirements. HealthKit data is never used for advertising or data mining.</p>
+<p>AeroStep requests <strong>read access to steps only</strong>. Data read from Health Connect or HealthKit is used solely to display your activity and deduplicate step counts inside the app. It is never transferred off your device (except as part of the activity summary you choose to send with an AI Coach question, see section 5), never used for advertising, never sold, and never shared with third parties. AeroStep's use of information received from Health Connect adheres to the <a href="https://support.google.com/googleplay/android-developer/answer/12991134">Health Connect Permissions policy</a>, including the Limited Use requirements. HealthKit data is never used for advertising or data mining.</p>
 
 <h2>3. Background operation</h2>
 <p>AeroStep does not run a background service and never uses GPS. Your phone's hardware step counter keeps counting on its own; when you open AeroStep it reads that counter and adds the steps taken since the last reading. Nothing is sent off your device.</p>
@@ -41,7 +42,7 @@
 <p>AeroStep never shows popup or interstitial ads. Ads appear only when you tap "Watch Video to Unlock" to earn an optional reward. These videos are served by Google AdMob, which may collect your device's advertising ID, IP address and app interaction data to deliver and measure ads. See <a href="https://policies.google.com/technologies/partner-sites">How Google uses information from sites or apps that use its services</a>. You can reset or delete your advertising ID in your device settings, and on iOS you can decline tracking when asked.</p>
 
 <h2>5. Sharing</h2>
-<p>We do not sell or rent personal data. The only third party that receives data is Google AdMob as described above. When you use "1-Tap Share", the app opens your device's share sheet with text you can review; nothing is sent unless you choose a destination.</p>
+<p>We do not sell or rent personal data. Third parties that receive data are: Google AdMob as described above, and Google's Gemini API when you use the online Stride AI coach. The first time you ask the online coach a question, the app asks for your permission; your question and today's activity summary are then sent to Google to generate the answer, and are processed under the <a href="https://ai.google.dev/gemini-api/terms">Gemini API Additional Terms</a>. No name, email or account identifier is sent. If you decline, the built-in offline coach answers on your device. When you use "1-Tap Share", the app opens your device's share sheet with text you can review; nothing is sent unless you choose a destination.</p>
 
 <h2>6. Security &amp; retention</h2>
 <p>Activity data is stored in the app's private storage on your device and is deleted when you uninstall the app. Any network traffic from the ad SDK is encrypted in transit (HTTPS).</p>

@@ -5,16 +5,35 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 
+import '../../core/state/activity_state.dart';
 import '../../core/state/app_settings.dart';
 import '../../design_system/design_system.dart';
+import 'friend_sheet.dart';
+import 'friends_provider.dart';
 import 'squad_data.dart';
 
-const _inviteCode = 'AERO-88';
 const _bingoLineBonus = 300;
+
+/// Squad weekly goal scales with the number of members (you + friends).
+const _goalPerMember = 70000;
+const _inviteText = 'Walk with me on AeroStep! https://play.google.com/store/apps/details?id=com.sunilkhatri.aerostep';
 final _fmt = NumberFormat.decimalPattern('en_US');
 
-/// Squads tab body — "Squads & Kinetic Step Bingo".
+/// One standings row: the user (real weekly steps) or a manually tracked friend.
+class _Entry {
+  const _Entry({required this.id, required this.name, required this.steps, required this.colors, this.friend});
+  final String id;
+  final String name;
+  final int steps;
+  final List<Color> colors;
+  final Friend? friend;
+
+  bool get isYou => friend == null;
+}
+
+/// Squads tab body — local friends standings + Kinetic Step Bingo.
 class SquadsView extends ConsumerStatefulWidget {
   const SquadsView({super.key});
 
@@ -24,19 +43,17 @@ class SquadsView extends ConsumerStatefulWidget {
 
 class _SquadsViewState extends ConsumerState<SquadsView> {
   static const _tabs = <(String, IconData)>[
-    ('Active Squad', Icons.groups),
+    ('Friends', Icons.groups),
     ('Weekly Bingo', Icons.grid_view),
-    ('Global Cups', Icons.emoji_events),
-    ('Create', Icons.add_circle),
+    ('Add Friend', Icons.person_add),
+    ('Invite', Icons.ios_share),
   ];
 
   final _scroll = ScrollController();
   final _standingsKey = GlobalKey();
   final _bingoKey = GlobalKey();
-  final _chatCtrl = TextEditingController();
 
   int _tab = 0;
-  StandingMetric _metric = StandingMetric.steps;
 
   // Bingo state.
   late final List<bool> _done = [for (final t in bingoTiles) t.done];
@@ -48,34 +65,10 @@ class _SquadsViewState extends ConsumerState<SquadsView> {
   List<int> _winTiles = const [];
   Timer? _winTimer;
 
-  // Live Team Pulse.
-  late final List<PulseMessage> _messages = [
-    PulseMessage(
-      author: 'Priya Sharma',
-      text: '"Just finished lunch interval strides! 4k in the bag 🏃‍♀️"',
-      at: DateTime.now().subtract(const Duration(minutes: 4)),
-      colors: const [AeroColors.tangerine, AeroColors.tangerineLight],
-    ),
-    PulseMessage(
-      author: 'Marcus Chen',
-      text: 'Took the stairs to the 9th-floor standup. Climb 3 floors ✅',
-      at: DateTime.now().subtract(const Duration(minutes: 18)),
-      colors: const [AeroColors.telemetryCyan, AeroColors.cyanDeep],
-    ),
-    PulseMessage(
-      author: 'Amina Diallo',
-      text: "Walk meeting at 3 PM around the lake loop — who's in?",
-      at: DateTime.now().subtract(const Duration(minutes: 41)),
-      colors: const [Color(0xFF934B13), Color(0xFFE48B4F)],
-    ),
-  ];
-  final Set<PulseMessage> _cheered = {};
-
   @override
   void dispose() {
     _winTimer?.cancel();
     _scroll.dispose();
-    _chatCtrl.dispose();
     super.dispose();
   }
 
@@ -120,25 +113,58 @@ class _SquadsViewState extends ConsumerState<SquadsView> {
   }
 
   void _onTab(int i) {
-    setState(() => _tab = i);
     switch (i) {
       case 0:
+        setState(() => _tab = 0);
         if (_scroll.hasClients) {
           _scroll.animateTo(0, duration: const Duration(milliseconds: 380), curve: Curves.easeOutCubic);
         }
       case 1:
+        setState(() => _tab = 1);
         _reveal(_bingoKey, 0.6);
       case 2:
-        _toast('Global Cups open after Week 12', icon: Icons.emoji_events);
+        _addFriend();
       case 3:
-        _toast('Squad creation is coming soon', icon: Icons.add_circle);
+        _invite();
     }
   }
 
-  Future<void> _copyInvite() async {
-    await Clipboard.setData(const ClipboardData(text: _inviteCode));
+  Future<void> _invite() async {
     HapticFeedback.lightImpact();
-    if (mounted) _toast('Invite code copied');
+    try {
+      await SharePlus.instance.share(ShareParams(text: _inviteText, subject: 'Walk with me on AeroStep'));
+    } catch (_) {
+      if (mounted) _toast("Couldn't open the share sheet", icon: Icons.error_outline);
+    }
+  }
+
+  Future<void> _addFriend() async {
+    if (ref.read(friendsProvider).length >= kMaxFriends) {
+      _toast('Your squad is full ($kMaxFriends friends max)', icon: Icons.info_outline);
+      return;
+    }
+    final result = await showFriendSheet(context);
+    if (!mounted || result is! FriendSheetSave) return;
+    if (ref.read(friendsProvider.notifier).add(result.name, result.steps)) {
+      HapticFeedback.mediumImpact();
+      _toast('${result.name} joined your squad', icon: Icons.person_add);
+    }
+  }
+
+  Future<void> _editFriend(Friend friend) async {
+    final result = await showFriendSheet(context, friend: friend);
+    if (!mounted || result == null) return;
+    final notifier = ref.read(friendsProvider.notifier);
+    switch (result) {
+      case FriendSheetSave(:final name, :final steps):
+        notifier.edit(friend.id, name: name, weeklySteps: steps);
+        HapticFeedback.lightImpact();
+        _toast('$name updated');
+      case FriendSheetRemove():
+        notifier.remove(friend.id);
+        HapticFeedback.mediumImpact();
+        _toast('${friend.name} removed', icon: Icons.person_remove);
+    }
   }
 
   List<(String, List<int>)> get _completedLines => bingoLines.where((l) => l.$2.every((i) => _done[i])).toList();
@@ -189,26 +215,26 @@ class _SquadsViewState extends ConsumerState<SquadsView> {
     _toast('+$pts AeroPoints added • Squad Multiplier boosted', icon: Icons.auto_awesome);
   }
 
-  void _send() {
-    final text = _chatCtrl.text.trim();
-    if (text.isEmpty) return;
-    final name = ref.read(userProfileProvider).name;
-    setState(() {
-      _messages.insert(
-        0,
-        PulseMessage(author: name, text: text, at: DateTime.now(), colors: youAvatarColors, isYou: true),
-      );
-      _chatCtrl.clear();
-    });
-    HapticFeedback.lightImpact();
-  }
-
   // ------------------------------------------------------------------ build
 
   @override
   Widget build(BuildContext context) {
     final p = context.aero;
-    final userName = ref.watch(userProfileProvider.select((u) => u.name));
+    final userName = ref.watch(userProfileProvider.select((u) => u.name)).trim();
+    final mySteps = ref.watch(activityProvider.select((a) => a.weeklyTotal));
+    final friends = ref.watch(friendsProvider);
+
+    final ranked =
+        <_Entry>[
+          _Entry(id: 'you', name: userName.isEmpty ? 'You' : userName, steps: mySteps, colors: youAvatarColors),
+          for (final f in friends)
+            _Entry(id: f.id, name: f.name, steps: f.weeklySteps, colors: f.avatarColors, friend: f),
+        ]..sort((a, b) {
+          final c = b.steps.compareTo(a.steps);
+          if (c != 0) return c;
+          if (a.isYou != b.isYou) return a.isYou ? -1 : 1;
+          return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+        });
 
     return AeroScrollPage(
       controller: _scroll,
@@ -224,24 +250,20 @@ class _SquadsViewState extends ConsumerState<SquadsView> {
                 AeroCategoryChip(label: _tabs[i].$1, icon: _tabs[i].$2, selected: i == _tab, onTap: () => _onTab(i)),
           ),
         ),
-        _SyncBanner(palette: p),
-        _SquadHeroCard(onInvite: _copyInvite, onOpen: () => _reveal(_standingsKey, 0.25)),
+        _PrivacyBanner(palette: p, members: ranked.length),
+        _SquadHeroCard(
+          entries: ranked,
+          onInvite: _invite,
+          onAdd: _addFriend,
+          onOpen: () => _reveal(_standingsKey, 0.25),
+        ),
         const SizedBox(height: 4),
         KeyedSubtree(
           key: _standingsKey,
-          child: _Standings(
-            metric: _metric,
-            userName: userName,
-            onMetric: (m) {
-              HapticFeedback.selectionClick();
-              setState(() => _metric = m);
-            },
-          ),
+          child: _Standings(ranked: ranked, onAdd: _addFriend, onInvite: _invite, onEdit: _editFriend),
         ),
         const SizedBox(height: 4),
         KeyedSubtree(key: _bingoKey, child: _bingoSection(p)),
-        const SizedBox(height: 4),
-        _pulseSection(p),
       ],
     );
   }
@@ -363,89 +385,6 @@ class _SquadsViewState extends ConsumerState<SquadsView> {
       ],
     );
   }
-
-  Widget _pulseSection(AeroPalette p) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text('Live Team Pulse', style: AeroText.headlineMd.copyWith(color: p.text)),
-            ),
-            Text(
-              'View Chat (${_messages.length + 5})',
-              style: AeroText.caption.copyWith(color: p.accentText, fontWeight: FontWeight.w800),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        BentoCard(
-          padding: const EdgeInsets.fromLTRB(14, 6, 14, 14),
-          child: Column(
-            children: [
-              for (var i = 0; i < _messages.length; i++) ...[
-                if (i > 0) Divider(height: 1, color: p.track),
-                _PulseRow(
-                  key: ObjectKey(_messages[i]),
-                  message: _messages[i],
-                  cheered: _cheered.contains(_messages[i]),
-                  onCheer: () {
-                    HapticFeedback.lightImpact();
-                    setState(() {
-                      final m = _messages[i];
-                      _cheered.contains(m) ? _cheered.remove(m) : _cheered.add(m);
-                    });
-                  },
-                ),
-              ],
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _chatCtrl,
-                      textInputAction: TextInputAction.send,
-                      onSubmitted: (_) => _send(),
-                      maxLength: 200,
-                      cursorColor: p.accent,
-                      style: AeroText.bodyMd.copyWith(color: p.text),
-                      decoration: InputDecoration(
-                        isDense: true,
-                        counterText: '',
-                        hintText: 'Cheer your squad…',
-                        hintStyle: AeroText.bodyMd.copyWith(color: p.textMuted),
-                        filled: true,
-                        fillColor: p.chip,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(99),
-                          borderSide: BorderSide.none,
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(99),
-                          borderSide: BorderSide(color: p.accent, width: 1.5),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  AeroCircleButton(
-                    icon: Icons.send_rounded,
-                    size: 44,
-                    tooltip: 'Send',
-                    background: AeroColors.tangerine,
-                    foreground: Colors.white,
-                    onPressed: _send,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
 }
 
 // =================================================================== widgets
@@ -471,15 +410,16 @@ class _InitialsAvatar extends StatelessWidget {
   );
 }
 
-class _SyncBanner extends StatelessWidget {
-  const _SyncBanner({required this.palette});
+class _PrivacyBanner extends StatelessWidget {
+  const _PrivacyBanner({required this.palette, required this.members});
   final AeroPalette palette;
+  final int members;
 
   @override
   Widget build(BuildContext context) {
     final p = palette;
     return Container(
-      padding: const EdgeInsets.fromLTRB(6, 6, 14, 6),
+      padding: const EdgeInsets.fromLTRB(12, 8, 14, 8),
       decoration: BoxDecoration(
         color: p.card,
         borderRadius: BorderRadius.circular(99),
@@ -487,21 +427,21 @@ class _SyncBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          PulsingDot(size: 8, color: p.cyan),
-          const SizedBox(width: 4),
+          Icon(Icons.lock_outline, size: 15, color: p.cyan),
+          const SizedBox(width: 6),
           Expanded(
             child: Text(
-              'Anti-Cheat Step Sync: Active'.toUpperCase(),
+              'Private squad • On this phone'.toUpperCase(),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: AeroText.labelCaps.copyWith(color: p.text, fontSize: 10),
             ),
           ),
           const SizedBox(width: 8),
-          Icon(Icons.verified_user, size: 15, color: p.cyan),
+          Icon(Icons.groups, size: 16, color: p.cyan),
           const SizedBox(width: 4),
           Text(
-            '14 Members',
+            '$members ${members == 1 ? 'Member' : 'Members'}',
             style: AeroText.caption.copyWith(color: p.text, fontWeight: FontWeight.w700),
           ),
         ],
@@ -511,17 +451,19 @@ class _SyncBanner extends StatelessWidget {
 }
 
 class _SquadHeroCard extends StatelessWidget {
-  const _SquadHeroCard({required this.onInvite, required this.onOpen});
+  const _SquadHeroCard({required this.entries, required this.onInvite, required this.onAdd, required this.onOpen});
+  final List<_Entry> entries;
   final VoidCallback onInvite;
+  final VoidCallback onAdd;
   final VoidCallback onOpen;
-
-  static const _current = 312400;
-  static const _goal = 400000;
 
   @override
   Widget build(BuildContext context) {
     const white = Colors.white;
-    const progress = _current / _goal;
+    final total = entries.fold<int>(0, (s, e) => s + e.steps);
+    final goal = _goalPerMember * entries.length;
+    final progress = goal == 0 ? 0.0 : (total / goal).clamp(0.0, 1.0);
+    final remaining = math.max(0, goal - total);
     return TangerineCard(
       child: Stack(
         clipBehavior: Clip.none,
@@ -542,26 +484,26 @@ class _SquadHeroCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         AeroBadge(
-                          'Enterprise Cohort',
-                          icon: Icons.apartment,
+                          'Weekly Challenge',
+                          icon: Icons.calendar_month,
                           background: white.withValues(alpha: 0.2),
                           foreground: white,
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Office Walkers Squad',
+                          'Your Walking Squad',
                           style: AeroText.headlineLgMobile.copyWith(color: white, height: 1.1),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Weekly Corporate Challenge • Week 12',
+                          'This week • ${_goalPerMember ~/ 1000}k steps per member',
                           style: AeroText.caption.copyWith(color: white.withValues(alpha: 0.85)),
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const _TeamCluster(),
+                  _TeamCluster(entries: entries),
                 ],
               ),
               const SizedBox(height: 18),
@@ -576,10 +518,10 @@ class _SquadHeroCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.baseline,
                         textBaseline: TextBaseline.alphabetic,
                         children: [
-                          Text(_fmt.format(_current), style: AeroText.displayHeroMobile.copyWith(color: white)),
+                          Text(_fmt.format(total), style: AeroText.displayHeroMobile.copyWith(color: white)),
                           const SizedBox(width: 6),
                           Text(
-                            '/ 400k',
+                            '/ ${_fmt.format(goal ~/ 1000)}k',
                             style: AeroText.numeric(18, weight: FontWeight.w600, color: white.withValues(alpha: 0.85)),
                           ),
                         ],
@@ -590,8 +532,8 @@ class _SquadHeroCard extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text('${(progress * 100).round()}%', style: AeroText.metricSm.copyWith(color: white)),
-                      Text('Weekly Goal', style: AeroText.caption.copyWith(color: white.withValues(alpha: 0.85))),
+                      Text('${(progress * 100).floor()}%', style: AeroText.metricSm.copyWith(color: white)),
+                      Text('Squad Goal', style: AeroText.caption.copyWith(color: white.withValues(alpha: 0.85))),
                     ],
                   ),
                 ],
@@ -649,11 +591,13 @@ class _SquadHeroCard extends StatelessWidget {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  const Icon(Icons.local_cafe, size: 16, color: white),
+                  Icon(remaining > 0 ? Icons.flag : Icons.celebration, size: 16, color: white),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      '87.6k steps to unlock Team Coffee Reward!',
+                      remaining > 0
+                          ? '${_fmt.format(remaining)} steps to reach the squad goal'
+                          : 'Squad goal reached this week! 🎉',
                       style: AeroText.caption.copyWith(color: white, fontWeight: FontWeight.w600),
                     ),
                   ),
@@ -668,41 +612,19 @@ class _SquadHeroCard extends StatelessWidget {
                       runSpacing: 8,
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        Material(
-                          color: white,
-                          shape: const StadiumBorder(),
-                          child: InkWell(
-                            customBorder: const StadiumBorder(),
-                            onTap: onInvite,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Flexible(
-                                    child: Text(
-                                      'Invite: $_inviteCode',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: AeroText.caption.copyWith(
-                                        color: AeroColors.charcoal,
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  const Icon(Icons.content_copy, size: 15, color: AeroColors.charcoal),
-                                ],
-                              ),
-                            ),
-                          ),
+                        AeroPillButton(
+                          label: 'Invite friends',
+                          icon: Icons.ios_share,
+                          tone: AeroButtonTone.white,
+                          height: 38,
+                          onPressed: onInvite,
                         ),
-                        AeroBadge(
-                          'Verified ✓',
-                          icon: Icons.shield,
-                          background: white.withValues(alpha: 0.2),
-                          foreground: white,
+                        AeroPillButton(
+                          label: 'Add friend',
+                          icon: Icons.person_add,
+                          tone: AeroButtonTone.ghost,
+                          height: 38,
+                          onPressed: onAdd,
                         ),
                       ],
                     ),
@@ -726,42 +648,43 @@ class _SquadHeroCard extends StatelessWidget {
   }
 }
 
+/// Overlapping avatars of the top squad members (real list, max 3 + overflow).
 class _TeamCluster extends StatelessWidget {
-  const _TeamCluster();
+  const _TeamCluster({required this.entries});
+  final List<_Entry> entries;
 
   @override
   Widget build(BuildContext context) {
     const d = 30.0;
     const step = 20.0;
-    const people = [
-      ('Priya Sharma', [Color(0xFFA04100), Color(0xFFFF7A2F)]),
-      ('Marcus Chen', [AeroColors.cyanDeep, AeroColors.telemetryCyan]),
-      ('Amina Diallo', [Color(0xFF743500), Color(0xFFE48B4F)]),
-    ];
+    final shown = entries.take(3).toList();
+    final extra = entries.length - shown.length;
+    final slots = shown.length + (extra > 0 ? 1 : 0);
     return SizedBox(
-      width: d + step * people.length,
+      width: d + step * (slots - 1),
       height: d,
       child: Stack(
         children: [
-          for (var i = 0; i < people.length; i++)
+          for (var i = 0; i < shown.length; i++)
             Positioned(
               left: i * step,
-              child: _InitialsAvatar(name: people[i].$1, colors: people[i].$2, size: d, border: Colors.white),
+              child: _InitialsAvatar(name: shown[i].name, colors: shown[i].colors, size: d, border: Colors.white),
             ),
-          Positioned(
-            left: people.length * step,
-            child: Container(
-              width: d,
-              height: d,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: AeroColors.charcoal,
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 2),
+          if (extra > 0)
+            Positioned(
+              left: shown.length * step,
+              child: Container(
+                width: d,
+                height: d,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AeroColors.charcoal,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                ),
+                child: Text('+$extra', style: AeroText.numeric(10, color: Colors.white)),
               ),
-              child: Text('+11', style: AeroText.numeric(10, color: Colors.white)),
             ),
-          ),
         ],
       ),
     );
@@ -769,36 +692,41 @@ class _TeamCluster extends StatelessWidget {
 }
 
 class _Standings extends StatelessWidget {
-  const _Standings({required this.metric, required this.userName, required this.onMetric});
-  final StandingMetric metric;
-  final String userName;
-  final ValueChanged<StandingMetric> onMetric;
+  const _Standings({required this.ranked, required this.onAdd, required this.onInvite, required this.onEdit});
+  final List<_Entry> ranked;
+  final VoidCallback onAdd;
+  final VoidCallback onInvite;
+  final ValueChanged<Friend> onEdit;
 
   static const _rowH = 72.0;
   static const _gap = 10.0;
 
+  String _youNote(int youRank) {
+    if (ranked.length == 1) return 'Add friends to compare your week';
+    final you = ranked[youRank];
+    if (youRank == 0) {
+      return ranked[1].steps == you.steps ? 'Tied for the lead' : 'Leading the squad! 👑';
+    }
+    final ahead = ranked[youRank - 1];
+    final first = ahead.name.split(' ').first;
+    final diff = ahead.steps - you.steps;
+    return diff <= 0 ? 'Tied with $first' : '${_fmt.format(diff)} steps to pass $first! 🚀';
+  }
+
+  String _friendNote(Friend f) {
+    final now = DateTime.now();
+    final weekStart = DateUtils.dateOnly(now).subtract(Duration(days: now.weekday - DateTime.monday));
+    if (f.updatedAt.toLocal().isBefore(weekStart)) return "Last week's entry • tap to update";
+    return '${updatedLabel(f.updatedAt, now: now)} • tap to edit';
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = context.aero;
-    final you = squadYou(userName);
-    final members = [...squadRivals, you];
-    final sorted = [...members]
-      ..sort(
-        (a, b) =>
-            metric == StandingMetric.steps ? b.steps.compareTo(a.steps) : a.paceSecPerKm.compareTo(b.paceSecPerKm),
-      );
-
-    final youRank = sorted.indexOf(you);
-    final String youNote;
-    if (youRank == 0) {
-      youNote = 'Leading the squad! 👑';
-    } else {
-      final ahead = sorted[youRank - 1];
-      final first = ahead.name.split(' ').first;
-      youNote = metric == StandingMetric.steps
-          ? '${_fmt.format(ahead.steps - you.steps)} steps to pass $first! 🚀'
-          : '${you.paceSecPerKm - ahead.paceSecPerKm}s/km to catch $first! 🚀';
-    }
+    final youRank = ranked.indexWhere((e) => e.isYou);
+    final byId = {for (var i = 0; i < ranked.length; i++) ranked[i].id: i};
+    // Stable paint order so AnimatedPositioned can slide rows when ranks change.
+    final stable = [...ranked]..sort((a, b) => a.id.compareTo(b.id));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -812,176 +740,222 @@ class _Standings extends StatelessWidget {
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   Text('Squad Standings', style: AeroText.headlineMd.copyWith(color: p.text)),
-                  Container(
-                    padding: const EdgeInsets.only(right: 8),
-                    decoration: BoxDecoration(
-                      color: p.isDark ? const Color(0xFF3A2416) : AeroColors.peachFixed,
-                      borderRadius: BorderRadius.circular(99),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const PulsingDot(size: 6, color: AeroColors.tangerine),
-                        Text('LIVE', style: AeroText.labelCaps.copyWith(color: p.accentText, fontSize: 10)),
-                      ],
-                    ),
+                  AeroBadge(
+                    'This week',
+                    background: p.isDark ? const Color(0xFF3A2416) : AeroColors.peachFixed,
+                    foreground: p.accentText,
                   ),
                 ],
               ),
             ),
             const SizedBox(width: 8),
-            SizedBox(
-              width: 128,
-              child: AeroSegmented<StandingMetric>(
-                options: StandingMetric.values,
-                selected: metric,
-                onChanged: onMetric,
-                activeTangerine: true,
-                height: 38,
-                labelOf: (m) => m == StandingMetric.steps ? 'Steps' : 'Pace',
-              ),
-            ),
+            AeroPillButton(label: 'Add', icon: Icons.person_add, height: 38, onPressed: onAdd),
           ],
         ),
         const SizedBox(height: 12),
         SizedBox(
-          height: members.length * _rowH + (members.length - 1) * _gap,
+          height: ranked.length * _rowH + (ranked.length - 1) * _gap,
           child: Stack(
             children: [
-              for (final m in members)
+              for (final e in stable)
                 AnimatedPositioned(
-                  key: ValueKey(m.id),
+                  key: ValueKey(e.id),
                   duration: const Duration(milliseconds: 480),
                   curve: Curves.easeInOutCubic,
                   left: 0,
                   right: 0,
-                  top: sorted.indexOf(m) * (_rowH + _gap),
+                  top: byId[e.id]! * (_rowH + _gap),
                   height: _rowH,
                   child: _StandingRow(
-                    member: m,
-                    rank: sorted.indexOf(m) + 1,
-                    metric: metric,
-                    note: m.isYou ? youNote : (metric == StandingMetric.steps ? m.stepsNote : m.paceNote),
+                    entry: e,
+                    rank: byId[e.id]! + 1,
+                    note: e.isYou ? _youNote(youRank) : _friendNote(e.friend!),
+                    onTap: e.isYou ? null : () => onEdit(e.friend!),
                   ),
                 ),
             ],
           ),
+        ),
+        if (ranked.length == 1) ...[const SizedBox(height: 12), _EmptyFriendsCard(onAdd: onAdd, onInvite: onInvite)],
+        const SizedBox(height: 10),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 1),
+              child: Icon(Icons.info_outline, size: 14, color: p.textMuted),
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                "Friends' steps are entered by you and stored only on this phone.",
+                style: AeroText.caption.copyWith(color: p.textMuted),
+              ),
+            ),
+          ],
         ),
       ],
     );
   }
 }
 
-class _StandingRow extends StatelessWidget {
-  const _StandingRow({required this.member, required this.rank, required this.metric, required this.note});
-  final SquadMember member;
-  final int rank;
-  final StandingMetric metric;
-  final String note;
+class _EmptyFriendsCard extends StatelessWidget {
+  const _EmptyFriendsCard({required this.onAdd, required this.onInvite});
+  final VoidCallback onAdd;
+  final VoidCallback onInvite;
 
   @override
   Widget build(BuildContext context) {
     final p = context.aero;
-    final you = member.isYou;
-    final valueColor = (you || rank == 1) ? p.accentText : p.text;
-    final noteColor = you ? p.accentText : (rank == 1 ? p.cyan : p.textMuted);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: you
-            ? (p.isDark ? AeroColors.tangerine.withValues(alpha: 0.16) : AeroColors.peachFixed.withValues(alpha: 0.9))
-            : p.card,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: you ? AeroColors.tangerine.withValues(alpha: p.isDark ? 0.45 : 0.3) : p.cardBorder),
-        boxShadow: p.cardShadow,
-      ),
-      child: Row(
+    return BentoCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _RankChip(rank: rank),
-          const SizedBox(width: 10),
-          Stack(
-            clipBehavior: Clip.none,
+          Row(
             children: [
-              _InitialsAvatar(name: member.name, colors: member.avatarColors, size: 42),
-              if (member.badge != null)
-                Positioned(
-                  right: -3,
-                  bottom: -3,
-                  child: Container(
-                    width: 18,
-                    height: 18,
-                    decoration: BoxDecoration(
-                      color: p.isDark ? AeroColors.espressoCard : Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(member.badge, size: 11, color: p.text),
-                  ),
-                ),
-              if (you)
-                Positioned(
-                  right: -1,
-                  top: -1,
-                  child: Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: AeroColors.tangerine,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
-                    ),
-                  ),
-                ),
+              const AeroIconTile(icon: Icons.group_add),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text('Walk together', style: AeroText.titleMd.copyWith(color: p.text)),
+              ),
             ],
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        you ? '${member.name} (You)' : member.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AeroText.bodyLg.copyWith(color: p.text, fontWeight: FontWeight.w700, height: 1.25),
-                      ),
-                    ),
-                    if (rank == 1 && !you) ...[const SizedBox(width: 4), Icon(Icons.star, size: 14, color: p.accent)],
-                  ],
-                ),
-                Text(
-                  note,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AeroText.caption.copyWith(color: noteColor),
-                ),
-              ],
-            ),
+          const SizedBox(height: 10),
+          Text(
+            "Add a friend and their steps this week to see who's leading. Invite them to AeroStep so they can "
+            'track their own walks.',
+            style: AeroText.bodyMd.copyWith(color: p.textMuted),
           ),
-          const SizedBox(width: 8),
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 260),
-            child: Column(
-              key: ValueKey(metric),
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  metric == StandingMetric.steps ? _fmt.format(member.steps) : member.pace,
-                  style: AeroText.metricSm.copyWith(color: valueColor),
-                ),
-                Text(
-                  metric == StandingMetric.steps ? 'STEPS' : 'MIN/KM',
-                  style: AeroText.labelCaps.copyWith(color: p.textMuted, fontSize: 10),
-                ),
-              ],
-            ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              AeroPillButton(label: 'Add a friend', icon: Icons.person_add, height: 44, onPressed: onAdd),
+              AeroPillButton(
+                label: 'Invite',
+                icon: Icons.ios_share,
+                tone: AeroButtonTone.charcoal,
+                height: 44,
+                onPressed: onInvite,
+              ),
+            ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _StandingRow extends StatelessWidget {
+  const _StandingRow({required this.entry, required this.rank, required this.note, this.onTap});
+  final _Entry entry;
+  final int rank;
+  final String note;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.aero;
+    final you = entry.isYou;
+    final valueColor = (you || rank == 1) ? p.accentText : p.text;
+    final noteColor = you ? p.accentText : (rank == 1 ? p.cyan : p.textMuted);
+    final br = BorderRadius.circular(24);
+    final label = you ? (entry.name == 'You' ? 'You' : '${entry.name} (You)') : entry.name;
+
+    return Semantics(
+      button: onTap != null,
+      label: 'Rank $rank, $label, ${_fmt.format(entry.steps)} steps',
+      excludeSemantics: true,
+      child: Container(
+        decoration: BoxDecoration(
+          color: you
+              ? (p.isDark ? AeroColors.tangerine.withValues(alpha: 0.16) : AeroColors.peachFixed.withValues(alpha: 0.9))
+              : p.card,
+          borderRadius: br,
+          border: Border.all(color: you ? AeroColors.tangerine.withValues(alpha: p.isDark ? 0.45 : 0.3) : p.cardBorder),
+          boxShadow: p.cardShadow,
+        ),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            borderRadius: br,
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                children: [
+                  _RankChip(rank: rank),
+                  const SizedBox(width: 10),
+                  Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      _InitialsAvatar(name: entry.name, colors: entry.colors, size: 42),
+                      if (you)
+                        Positioned(
+                          right: -1,
+                          top: -1,
+                          child: Container(
+                            width: 12,
+                            height: 12,
+                            decoration: BoxDecoration(
+                              color: AeroColors.tangerine,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 2),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                label,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AeroText.bodyLg.copyWith(
+                                  color: p.text,
+                                  fontWeight: FontWeight.w700,
+                                  height: 1.25,
+                                ),
+                              ),
+                            ),
+                            if (rank == 1 && !you) ...[
+                              const SizedBox(width: 4),
+                              Icon(Icons.star, size: 14, color: p.accent),
+                            ],
+                          ],
+                        ),
+                        Text(
+                          note,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AeroText.caption.copyWith(color: noteColor),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(_fmt.format(entry.steps), style: AeroText.metricSm.copyWith(color: valueColor)),
+                      Text('STEPS', style: AeroText.labelCaps.copyWith(color: p.textMuted, fontSize: 10)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -1008,7 +982,10 @@ class _RankChip extends StatelessWidget {
       decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
       child: rank == 1
           ? Icon(Icons.workspace_premium, size: 18, color: fg)
-          : Text('$rank', style: AeroText.numeric(14, color: fg)),
+          : FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text('$rank', style: AeroText.numeric(14, color: fg)),
+            ),
     );
   }
 }
@@ -1233,81 +1210,4 @@ class _ConfettiPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_ConfettiPainter old) => old.t != t;
-}
-
-class _PulseRow extends StatelessWidget {
-  const _PulseRow({super.key, required this.message, required this.cheered, required this.onCheer});
-  final PulseMessage message;
-  final bool cheered;
-  final VoidCallback onCheer;
-
-  @override
-  Widget build(BuildContext context) {
-    final p = context.aero;
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: 1),
-      duration: const Duration(milliseconds: 350),
-      curve: Curves.easeOutCubic,
-      builder: (_, t, child) => Opacity(
-        opacity: t,
-        child: Transform.translate(offset: Offset(0, 8 * (1 - t)), child: child),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _InitialsAvatar(name: message.author, colors: message.colors, size: 38),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          message.isYou ? '${message.author} (You)' : message.author,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AeroText.bodyMd.copyWith(color: p.text, fontWeight: FontWeight.w800),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(timeAgo(message.at), style: AeroText.caption.copyWith(color: p.textMuted, fontSize: 11)),
-                    ],
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    message.text,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                    style: AeroText.bodyMd.copyWith(color: p.textMuted, fontSize: 13),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            if (message.isYou)
-              const SizedBox(width: 36)
-            else
-              AnimatedScale(
-                scale: cheered ? 1.1 : 1,
-                duration: const Duration(milliseconds: 200),
-                child: AeroCircleButton(
-                  icon: Icons.local_fire_department,
-                  size: 36,
-                  tooltip: 'Cheer ${message.author}',
-                  background: cheered
-                      ? AeroColors.tangerine
-                      : (p.isDark ? const Color(0xFF3A2416) : AeroColors.peachFixed),
-                  foreground: cheered ? Colors.white : p.accentText,
-                  onPressed: onCheer,
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
 }
